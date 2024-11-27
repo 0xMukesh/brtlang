@@ -9,7 +9,7 @@ import (
 	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
-func LexStrLiterals(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexStrLiterals() (*tokens.Token, *LexerError) {
 	strLiteral := ""
 	strLiteral += string(l.Char)
 	closingQuoteFound := false
@@ -38,7 +38,7 @@ func LexStrLiterals(l *Lexer) (*tokens.Token, *LexerError) {
 	return tokens.NewToken(tokens.STRING, strLiteral, strLiteral[1:len(strLiteral)-1]), nil
 }
 
-func LexNumLiterals(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 	numLiteral := ""
 	numLiteral += string(l.Char)
 	decimalPointFound := false
@@ -77,7 +77,7 @@ func LexNumLiterals(l *Lexer) (*tokens.Token, *LexerError) {
 	return tokens.NewToken(tokens.NUMBER, numLiteral, literal), nil
 }
 
-func LexIdentifier(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexIdentifier() (*tokens.Token, *LexerError) {
 	identLiteral := ""
 	identLiteral += string(l.Char)
 

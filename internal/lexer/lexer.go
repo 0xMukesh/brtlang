@@ -42,11 +42,7 @@ func (l *Lexer) PeekChar() byte {
 	return l.Content[l.Idx]
 }
 
-func (l *Lexer) LexTokenWithPeek() {
-
-}
-
-func (l *Lexer) ParseChar() (*tokens.Token, *LexerError) {
+func (l *Lexer) Lex() (*tokens.Token, *LexerError) {
 	if l.Char == 0 {
 		return tokens.NewToken(tokens.EOF, "", "null"), nil
 	}
@@ -60,40 +56,40 @@ func (l *Lexer) ParseChar() (*tokens.Token, *LexerError) {
 
 		if doesExists {
 			if *tknType == tokens.EQUAL {
-				tkn, err := LexEqualChar(l)
+				tkn, err := l.LexEqualChar()
 				return tkn, err
 			}
 
 			if *tknType == tokens.BANG {
-				tkn, err := LexBangChar(l)
+				tkn, err := l.LexBangChar()
 				return tkn, err
 			}
 
 			if *tknType == tokens.LESS {
-				tkn, err := LexLessChar(l)
+				tkn, err := l.LexLessChar()
 				return tkn, err
 			}
 
 			if *tknType == tokens.GREATER {
-				tkn, err := LexGreaterChar(l)
+				tkn, err := l.LexGreaterChar()
 				return tkn, err
 			}
 
 			if *tknType == tokens.SLASH {
-				tkn, err := LexSlashChar(l)
+				tkn, err := l.LexSlashChar()
 				return tkn, err
 			}
 
 			return tokens.NewToken(*tknType, string(l.Char), "null"), nil
 		} else {
 			if l.Char == '"' {
-				tkn, err := LexStrLiterals(l)
+				tkn, err := l.LexStrLiterals()
 				return tkn, err
 			} else if unicode.IsDigit(rune(l.Char)) {
-				tkn, err := LexNumLiterals(l)
+				tkn, err := l.LexNumLiterals()
 				return tkn, err
 			} else {
-				tkn, err := LexIdentifier(l)
+				tkn, err := l.LexIdentifier()
 				return tkn, err
 			}
 		}

@@ -3,7 +3,7 @@ package lexer
 import "github.com/0xmukesh/interpreter/internal/tokens"
 
 // handles scanning "=" and "==" tokens
-func LexEqualChar(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexEqualChar() (*tokens.Token, *LexerError) {
 	nextChar := l.PeekChar()
 
 	if nextChar == '=' {
@@ -15,7 +15,7 @@ func LexEqualChar(l *Lexer) (*tokens.Token, *LexerError) {
 }
 
 // handles scanning "!" and "!=" tokens
-func LexBangChar(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexBangChar() (*tokens.Token, *LexerError) {
 	nextChar := l.PeekChar()
 
 	if nextChar == '=' {
@@ -27,7 +27,7 @@ func LexBangChar(l *Lexer) (*tokens.Token, *LexerError) {
 }
 
 // handles scanning "<" and "<=" tokens
-func LexLessChar(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexLessChar() (*tokens.Token, *LexerError) {
 	nextChar := l.PeekChar()
 
 	if nextChar == '=' {
@@ -39,7 +39,7 @@ func LexLessChar(l *Lexer) (*tokens.Token, *LexerError) {
 }
 
 // handles scanning ">" and ">=" tokens
-func LexGreaterChar(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexGreaterChar() (*tokens.Token, *LexerError) {
 	nextChar := l.PeekChar()
 
 	if nextChar == '=' {
@@ -51,7 +51,7 @@ func LexGreaterChar(l *Lexer) (*tokens.Token, *LexerError) {
 }
 
 // handles scanning "/" token and "//" (aka comment)
-func LexSlashChar(l *Lexer) (*tokens.Token, *LexerError) {
+func (l *Lexer) LexSlashChar() (*tokens.Token, *LexerError) {
 	nextChar := l.PeekChar()
 
 	if nextChar == '/' {
