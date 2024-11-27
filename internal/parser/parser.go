@@ -87,7 +87,7 @@ func (p *Parser) term() (*ast.AstNode, *ParserError) {
 			p.Advance()
 			p.Advance()
 
-			right, err := p.factor()
+			right, err := p.term()
 			if err != nil {
 				return nil, err
 			}
@@ -116,7 +116,7 @@ func (p *Parser) factor() (*ast.AstNode, *ParserError) {
 			p.Advance()
 			p.Advance()
 
-			right, err := p.unary()
+			right, err := p.factor()
 			if err != nil {
 				return nil, err
 			}
@@ -173,5 +173,5 @@ func (p *Parser) primary() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression")
 	}
 
-	return ast.NewAstNode(ast.LITERAL, ast.NewLiteralExpr(curr.Type, curr.Lexeme)), nil
+	return ast.NewAstNode(ast.LITERAL, ast.NewLiteralExpr(curr.Type, curr.Literal)), nil
 }

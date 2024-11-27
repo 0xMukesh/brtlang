@@ -32,6 +32,12 @@ func ParseCmdHandler(src []byte) {
 		}
 	}
 
+	for i, tkn := range tkns {
+		if tkn.Type == tokens.IGNORE {
+			tkns = append(tkns[:i], tkns[i+1:]...)
+		}
+	}
+
 	parser := parser.NewParser(tkns)
 
 	for range tkns {
