@@ -61,3 +61,20 @@ func NewUnaryExpr(operator tokens.TokenType, expr Expr) UnaryExpr {
 		Expr:     expr,
 	}
 }
+
+type BinaryExpr struct {
+	Left     Expr
+	Operator tokens.TokenType
+	Right    Expr
+}
+
+func (e BinaryExpr) ParseExpr() string {
+	return fmt.Sprintf("(%s %s %s)", e.Operator.Literal(), e.Left.ParseExpr(), e.Right.ParseExpr())
+}
+func NewBinaryExpr(left Expr, operator tokens.TokenType, right Expr) BinaryExpr {
+	return BinaryExpr{
+		Left:     left,
+		Operator: operator,
+		Right:    right,
+	}
+}

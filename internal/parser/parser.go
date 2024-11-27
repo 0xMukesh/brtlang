@@ -20,6 +20,12 @@ func NewParser(tokens []tokens.Token) *Parser {
 	}
 }
 
+func (p *Parser) Advance() {
+	if !p.IsAtEnd() {
+		p.Idx++
+	}
+}
+
 func (p *Parser) Curr() tokens.Token {
 	return p.Tokens[p.Idx-1]
 }
@@ -67,11 +73,61 @@ func (p *Parser) comparison() (*ast.AstNode, *ParserError) {
 }
 
 func (p *Parser) term() (*ast.AstNode, *ParserError) {
-	return p.factor()
+	expr, err := p.factor()
+	if err != nil {
+		return nil, err
+	}
+
+	if expr != nil {
+		// "peeks" and checks if the next token is the expected operator. if yes, then skip onto the part after the operator
+		token := p.Peek()
+		expectedOperators := []tokens.TokenType{tokens.PLUS, tokens.MINUS}
+
+		if utils.HasValueArray(expectedOperators, token.Type) {
+			p.Advance()
+			p.Advance()
+
+			right, err := p.factor()
+			if err != nil {
+				return nil, err
+			}
+
+			if right != nil {
+				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr))
+			}
+		}
+	}
+
+	return expr, nil
 }
 
 func (p *Parser) factor() (*ast.AstNode, *ParserError) {
-	return p.unary()
+	expr, err := p.unary()
+	if err != nil {
+		return nil, err
+	}
+
+	if expr != nil {
+		// "peeks" and checks if the next token is the expected operator. if yes, then skip onto the part after the operator
+		token := p.Peek()
+		expectedOperators := []tokens.TokenType{tokens.STAR, tokens.SLASH}
+
+		if utils.HasValueArray(expectedOperators, token.Type) {
+			p.Advance()
+			p.Advance()
+
+			right, err := p.unary()
+			if err != nil {
+				return nil, err
+			}
+
+			if right != nil {
+				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr))
+			}
+		}
+	}
+
+	return expr, nil
 }
 
 func (p *Parser) unary() (*ast.AstNode, *ParserError) {
