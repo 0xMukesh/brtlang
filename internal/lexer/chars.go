@@ -4,10 +4,10 @@ import "github.com/0xmukesh/interpreter/internal/tokens"
 
 // handles scanning "=" and "==" tokens
 func (l *Lexer) LexEqualChar() (*tokens.Token, *LexerError) {
-	nextChar := l.PeekChar()
+	nextChar := l.Peek()
 
 	if nextChar == '=' {
-		l.ReadChar()
+		l.Read()
 		return tokens.NewToken(tokens.EQUAL_EQUAL, tokens.EQUAL_EQUAL.Literal(), "null"), nil
 	}
 
@@ -16,10 +16,10 @@ func (l *Lexer) LexEqualChar() (*tokens.Token, *LexerError) {
 
 // handles scanning "!" and "!=" tokens
 func (l *Lexer) LexBangChar() (*tokens.Token, *LexerError) {
-	nextChar := l.PeekChar()
+	nextChar := l.Peek()
 
 	if nextChar == '=' {
-		l.ReadChar()
+		l.Read()
 		return tokens.NewToken(tokens.BANG_EQUAL, tokens.BANG_EQUAL.Literal(), "null"), nil
 	}
 
@@ -28,10 +28,10 @@ func (l *Lexer) LexBangChar() (*tokens.Token, *LexerError) {
 
 // handles scanning "<" and "<=" tokens
 func (l *Lexer) LexLessChar() (*tokens.Token, *LexerError) {
-	nextChar := l.PeekChar()
+	nextChar := l.Peek()
 
 	if nextChar == '=' {
-		l.ReadChar()
+		l.Read()
 		return tokens.NewToken(tokens.LESS_EQUAL, tokens.LESS_EQUAL.Literal(), "null"), nil
 	}
 
@@ -40,10 +40,10 @@ func (l *Lexer) LexLessChar() (*tokens.Token, *LexerError) {
 
 // handles scanning ">" and ">=" tokens
 func (l *Lexer) LexGreaterChar() (*tokens.Token, *LexerError) {
-	nextChar := l.PeekChar()
+	nextChar := l.Peek()
 
 	if nextChar == '=' {
-		l.ReadChar()
+		l.Read()
 		return tokens.NewToken(tokens.GREATER_EQUAL, tokens.GREATER_EQUAL.Literal(), "null"), nil
 	}
 
@@ -52,11 +52,11 @@ func (l *Lexer) LexGreaterChar() (*tokens.Token, *LexerError) {
 
 // handles scanning "/" token and "//" (aka comment)
 func (l *Lexer) LexSlashChar() (*tokens.Token, *LexerError) {
-	nextChar := l.PeekChar()
+	nextChar := l.Peek()
 
 	if nextChar == '/' {
 		for {
-			l.ReadChar()
+			l.Read()
 			// read until end of the line/file
 			if l.Char == '\n' || l.Char == 0 {
 				break

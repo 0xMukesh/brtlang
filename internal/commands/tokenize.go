@@ -9,21 +9,21 @@ import (
 )
 
 func TokenizeCmdHandler(src []byte) {
-	lexer := lexer.NewLexer(src)
+	l := lexer.NewLexer(src)
 
 	hasLexicalErrs := 1
 
 	for {
-		lexer.ReadChar()
-		tkn, err := lexer.Lex()
+		l.Read()
+		tkn, err := l.Lex()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", lexer.Line, err.Message)
+			fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", l.Line, err.Message)
 		}
 
 		if tkn != nil {
 			if tkn.Type == tokens.ILLEGAL {
-				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", lexer.Line, tkn.Literal)
+				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", l.Line, tkn.Literal)
 				hasLexicalErrs *= 0
 			} else if tkn.Type == tokens.IGNORE {
 				continue
@@ -33,7 +33,7 @@ func TokenizeCmdHandler(src []byte) {
 			}
 		}
 
-		if lexer.Char == 0 {
+		if l.Char == 0 {
 			if hasLexicalErrs == 0 {
 				os.Exit(65)
 			} else {

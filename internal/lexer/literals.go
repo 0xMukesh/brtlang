@@ -15,13 +15,13 @@ func (l *Lexer) LexStrLiterals() (*tokens.Token, *LexerError) {
 	closingQuoteFound := false
 
 	for {
-		nextChar := l.PeekChar()
+		nextChar := l.Peek()
 
 		if nextChar == '\n' || nextChar == 0 {
 			break
 		}
 
-		l.ReadChar()
+		l.Read()
 
 		strLiteral += string(l.Char)
 
@@ -44,7 +44,7 @@ func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 	decimalPointFound := false
 
 	for {
-		nextChar := l.PeekChar()
+		nextChar := l.Peek()
 
 		if !(unicode.IsDigit(rune(nextChar)) || nextChar == '.') {
 			break
@@ -57,7 +57,7 @@ func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 			decimalPointFound = true
 		}
 
-		l.ReadChar()
+		l.Read()
 
 		numLiteral += string(l.Char)
 	}
@@ -82,7 +82,7 @@ func (l *Lexer) LexIdentifier() (*tokens.Token, *LexerError) {
 	identLiteral += string(l.Char)
 
 	for {
-		nextChar := l.PeekChar()
+		nextChar := l.Peek()
 
 		_, existsInTknMap := utils.HasValueMap(tokens.TknLiteralMapping, string(nextChar))
 
@@ -90,7 +90,7 @@ func (l *Lexer) LexIdentifier() (*tokens.Token, *LexerError) {
 			break
 		}
 
-		l.ReadChar()
+		l.Read()
 		identLiteral += string(l.Char)
 	}
 

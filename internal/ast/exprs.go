@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/0xmukesh/interpreter/internal/tokens"
+import (
+	"fmt"
+
+	"github.com/0xmukesh/interpreter/internal/tokens"
+)
 
 type ExprType int
 
@@ -27,5 +31,18 @@ func NewLiteralExpr(tokenType tokens.TokenType, value string) LiteralExpr {
 	return LiteralExpr{
 		TokenType: tokenType,
 		Value:     value,
+	}
+}
+
+type GroupingExpr struct {
+	Expr Expr
+}
+
+func (e GroupingExpr) ParseExpr() string {
+	return fmt.Sprintf("(group %s)", e.Expr.ParseExpr())
+}
+func NewGroupingExpr(expr Expr) GroupingExpr {
+	return GroupingExpr{
+		Expr: expr,
 	}
 }

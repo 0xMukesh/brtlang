@@ -1,8 +1,11 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/0xmukesh/interpreter/internal/ast"
 	"github.com/0xmukesh/interpreter/internal/tokens"
+	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
 type Parser struct {
@@ -25,6 +28,27 @@ func (p *Parser) Peek() tokens.Token {
 	return p.Tokens[p.Idx]
 }
 
+func (p *Parser) IsAtEnd() bool {
+	return p.Idx >= len(p.Tokens)
+}
+
+func (p *Parser) Check(expected tokens.TokenType) bool {
+	if p.IsAtEnd() {
+		return false
+	}
+
+	return p.Peek().Type == expected
+}
+
+func (p *Parser) Consume(expected tokens.TokenType, err string) {
+	if p.Check(expected) {
+		p.Idx++
+		return
+	}
+
+	utils.EPrint(fmt.Sprintf("%s\n", err))
+}
+
 // rules in order of precedence (lowest to highest)
 // 1. equality
 // 2. comparison
@@ -34,7 +58,7 @@ func (p *Parser) Peek() tokens.Token {
 // 6. primary
 
 func (p *Parser) Parse() *ast.AstNode {
-	if p.Idx >= len(p.Tokens) {
+	if p.IsAtEnd() {
 		return nil
 	}
 
@@ -67,6 +91,14 @@ func (p *Parser) primary() *ast.AstNode {
 
 	if curr.Type == tokens.EOF || curr.Type == tokens.ILLEGAL || curr.Type == tokens.IGNORE {
 		return nil
+	}
+
+	if curr.Type == tokens.LEFT_PAREN {
+		node := p.Parse()
+		if node != nil {
+			p.Consume(tokens.RIGHT_PAREN, "expected ')' after this expression")
+			return ast.NewAstNode(ast.GROUPING, ast.NewGroupingExpr(node.Expr))
+		}
 	}
 
 	return ast.NewAstNode(ast.LITERAL, ast.NewLiteralExpr(curr.Type, curr.Lexeme))

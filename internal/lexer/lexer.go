@@ -23,8 +23,12 @@ func NewLexer(content []byte) *Lexer {
 	}
 }
 
-func (l *Lexer) ReadChar() {
-	if l.Idx >= len(l.Content) {
+func (l *Lexer) IsAtEnd() bool {
+	return l.Idx >= len(l.Content)
+}
+
+func (l *Lexer) Read() {
+	if l.IsAtEnd() {
 		l.Char = 0
 		return
 	}
@@ -34,8 +38,8 @@ func (l *Lexer) ReadChar() {
 	l.Idx++
 }
 
-func (l *Lexer) PeekChar() byte {
-	if l.Idx >= len(l.Content) {
+func (l *Lexer) Peek() byte {
+	if l.IsAtEnd() {
 		return 0
 	}
 

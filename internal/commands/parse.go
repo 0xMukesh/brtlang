@@ -14,7 +14,7 @@ func ParseCmdHandler(src []byte) {
 	var tkns []tokens.Token
 
 	for {
-		lexer.ReadChar()
+		lexer.Read()
 
 		tkn, err := lexer.Lex()
 		if err != nil {
