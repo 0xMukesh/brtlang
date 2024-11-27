@@ -2,23 +2,19 @@ package parser
 
 import "fmt"
 
-type ParserErrorType int
-
 const (
-	EXPRESSION_EXPECTED ParserErrorType = iota
-	TOKEN_EXPECTED
+	EXPRESSION_EXPECTED = "expression expected"
+	TOKEN_EXPECTED      = ""
 )
 
 type ParserError struct {
-	Type    ParserErrorType
 	Message string
 	At      string
 	Line    int
 }
 
-func NewParserError(errType ParserErrorType, msg string, at string, line int) *ParserError {
+func NewParserError(msg string, at string, line int) *ParserError {
 	return &ParserError{
-		Type:    errType,
 		Message: msg,
 		At:      at,
 		Line:    line,
