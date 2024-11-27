@@ -10,9 +10,9 @@ type ExprType int
 
 const (
 	LITERAL ExprType = iota
+	GROUPING
 	UNARY
 	BINARY
-	GROUPING
 )
 
 type Expr interface {
@@ -44,5 +44,20 @@ func (e GroupingExpr) ParseExpr() string {
 func NewGroupingExpr(expr Expr) GroupingExpr {
 	return GroupingExpr{
 		Expr: expr,
+	}
+}
+
+type UnaryExpr struct {
+	Operator tokens.TokenType
+	Expr     Expr
+}
+
+func (e UnaryExpr) ParseExpr() string {
+	return fmt.Sprintf("(%s %s)", e.Operator.Literal(), e.Expr.ParseExpr())
+}
+func NewUnaryExpr(operator tokens.TokenType, expr Expr) UnaryExpr {
+	return UnaryExpr{
+		Operator: operator,
+		Expr:     expr,
 	}
 }

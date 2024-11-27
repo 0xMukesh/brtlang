@@ -18,7 +18,7 @@ func TokenizeCmdHandler(src []byte) {
 		tkn, err := l.Lex()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", l.Line, err.Message)
+			fmt.Fprintf(os.Stderr, "%s\n", err.String())
 		}
 
 		if tkn != nil {

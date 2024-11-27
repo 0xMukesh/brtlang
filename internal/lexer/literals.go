@@ -32,7 +32,7 @@ func (l *Lexer) LexStrLiterals() (*tokens.Token, *LexerError) {
 	}
 
 	if !closingQuoteFound {
-		return nil, NewLexerError(UNTERMINATED_STRING, "Unterminated string.")
+		return nil, NewLexerError(UNTERMINATED_STRING, "Unterminated string.", l.Line)
 	}
 
 	return tokens.NewToken(tokens.STRING, strLiteral, strLiteral[1:len(strLiteral)-1]), nil
@@ -52,7 +52,7 @@ func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 
 		if nextChar == '.' {
 			if decimalPointFound {
-				return nil, NewLexerError(UNTERMINATED_NUMBER, "Unterminated number.")
+				return nil, NewLexerError(UNTERMINATED_NUMBER, "Unterminated number.", l.Line)
 			}
 			decimalPointFound = true
 		}
@@ -63,7 +63,7 @@ func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 	}
 
 	if strings.HasSuffix(numLiteral, ".") {
-		return nil, NewLexerError(UNTERMINATED_NUMBER, "Unterminated number.")
+		return nil, NewLexerError(UNTERMINATED_NUMBER, "Unterminated number.", l.Line)
 	}
 
 	var literal string

@@ -40,66 +40,82 @@ func (p *Parser) Check(expected tokens.TokenType) bool {
 	return p.Peek().Type == expected
 }
 
-func (p *Parser) Consume(expected tokens.TokenType, err string) {
+func (p *Parser) Consume(expected tokens.TokenType, err ParserError) {
 	if p.Check(expected) {
 		p.Idx++
 		return
 	}
 
-	utils.EPrint(fmt.Sprintf("%s\n", err))
+	utils.EPrint(fmt.Sprintf("%s\n", err.String()))
 }
 
-// rules in order of precedence (lowest to highest)
-// 1. equality
-// 2. comparison
-// 3. term
-// 4. factor
-// 5. unary
-// 6. primary
-
-func (p *Parser) Parse() *ast.AstNode {
+func (p *Parser) Parse() (*ast.AstNode, *ParserError) {
 	if p.IsAtEnd() {
-		return nil
+		return nil, nil
 	}
 
 	p.Idx++
 	return p.equality()
 }
 
-func (p *Parser) equality() *ast.AstNode {
+func (p *Parser) equality() (*ast.AstNode, *ParserError) {
 	return p.comparison()
 }
 
-func (p *Parser) comparison() *ast.AstNode {
+func (p *Parser) comparison() (*ast.AstNode, *ParserError) {
 	return p.term()
 }
 
-func (p *Parser) term() *ast.AstNode {
+func (p *Parser) term() (*ast.AstNode, *ParserError) {
 	return p.factor()
 }
 
-func (p *Parser) factor() *ast.AstNode {
+func (p *Parser) factor() (*ast.AstNode, *ParserError) {
 	return p.unary()
 }
 
-func (p *Parser) unary() *ast.AstNode {
+func (p *Parser) unary() (*ast.AstNode, *ParserError) {
+	operator := p.Curr()
+	expectedOperators := []tokens.TokenType{tokens.BANG, tokens.MINUS}
+
+	if utils.HasValueArray(expectedOperators, operator.Type) {
+		node, err := p.Parse()
+		if err != nil {
+			return nil, err
+		}
+
+		if node != nil {
+			return ast.NewAstNode(ast.UNARY, ast.NewUnaryExpr(operator.Type, node.Expr)), nil
+		}
+
+		return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression")
+	}
+
 	return p.primary()
 }
 
-func (p *Parser) primary() *ast.AstNode {
+func (p *Parser) primary() (*ast.AstNode, *ParserError) {
 	curr := p.Curr()
+	canIgnore := []tokens.TokenType{tokens.EOF, tokens.ILLEGAL, tokens.IGNORE}
 
-	if curr.Type == tokens.EOF || curr.Type == tokens.ILLEGAL || curr.Type == tokens.IGNORE {
-		return nil
+	if utils.HasValueArray(canIgnore, curr.Type) {
+		return nil, nil
 	}
 
 	if curr.Type == tokens.LEFT_PAREN {
-		node := p.Parse()
-		if node != nil {
-			p.Consume(tokens.RIGHT_PAREN, "expected ')' after this expression")
-			return ast.NewAstNode(ast.GROUPING, ast.NewGroupingExpr(node.Expr))
+		node, err := p.Parse()
+		if err != nil {
+			return nil, err
 		}
+
+		if node != nil {
+			err := NewParserError(TOKEN_EXPECTED, "expected ')' after this expression")
+			p.Consume(tokens.RIGHT_PAREN, *err)
+			return ast.NewAstNode(ast.GROUPING, ast.NewGroupingExpr(node.Expr)), nil
+		}
+
+		return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression")
 	}
 
-	return ast.NewAstNode(ast.LITERAL, ast.NewLiteralExpr(curr.Type, curr.Lexeme))
+	return ast.NewAstNode(ast.LITERAL, ast.NewLiteralExpr(curr.Type, curr.Lexeme)), nil
 }

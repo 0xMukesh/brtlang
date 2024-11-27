@@ -7,6 +7,7 @@ import (
 	"github.com/0xmukesh/interpreter/internal/lexer"
 	"github.com/0xmukesh/interpreter/internal/parser"
 	"github.com/0xmukesh/interpreter/internal/tokens"
+	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
 func ParseCmdHandler(src []byte) {
@@ -18,7 +19,8 @@ func ParseCmdHandler(src []byte) {
 
 		tkn, err := lexer.Lex()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", lexer.Line, err.Message)
+			// exit if lexer throws an error
+			utils.EPrint(fmt.Sprintf("[line %d] Error: %s\n", lexer.Line, err.Message))
 		}
 
 		if tkn != nil {
@@ -33,7 +35,11 @@ func ParseCmdHandler(src []byte) {
 	parser := parser.NewParser(tkns)
 
 	for range tkns {
-		node := parser.Parse()
+		node, err := parser.Parse()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err.String())
+		}
+
 		if node != nil {
 			fmt.Printf("%+v\n", node.Expr.ParseExpr())
 		}
