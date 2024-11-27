@@ -7,10 +7,11 @@ type Token struct {
 	Line    int
 }
 
-func NewToken(tokenType TokenType, lexeme string, literal string) *Token {
+func NewToken(tokenType TokenType, lexeme string, literal string, line int) *Token {
 	return &Token{
 		Type:    tokenType,
 		Lexeme:  lexeme,
 		Literal: literal,
+		Line:    line,
 	}
 }

@@ -35,7 +35,7 @@ func (l *Lexer) LexStrLiterals() (*tokens.Token, *LexerError) {
 		return nil, NewLexerError(UNTERMINATED_STRING, "Unterminated string.", l.Line)
 	}
 
-	return tokens.NewToken(tokens.STRING, strLiteral, strLiteral[1:len(strLiteral)-1]), nil
+	return tokens.NewToken(tokens.STRING, strLiteral, strLiteral[1:len(strLiteral)-1], l.Line), nil
 }
 
 func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
@@ -74,7 +74,7 @@ func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 		literal = numLiteral
 	}
 
-	return tokens.NewToken(tokens.NUMBER, numLiteral, literal), nil
+	return tokens.NewToken(tokens.NUMBER, numLiteral, literal, l.Line), nil
 }
 
 func (l *Lexer) LexIdentifier() (*tokens.Token, *LexerError) {
@@ -96,8 +96,8 @@ func (l *Lexer) LexIdentifier() (*tokens.Token, *LexerError) {
 
 	identifierType, isReserved := utils.HasValueMap(tokens.ReservedKeywordsMapping, strings.ToUpper(identLiteral))
 	if isReserved {
-		return tokens.NewToken(*identifierType, identLiteral, "null"), nil
+		return tokens.NewToken(*identifierType, identLiteral, "null", l.Line), nil
 	}
 
-	return tokens.NewToken(tokens.IDENTIFIER, identLiteral, "null"), nil
+	return tokens.NewToken(tokens.IDENTIFIER, identLiteral, "null", l.Line), nil
 }

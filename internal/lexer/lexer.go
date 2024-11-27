@@ -48,11 +48,11 @@ func (l *Lexer) Peek() byte {
 
 func (l *Lexer) Lex() (*tokens.Token, *LexerError) {
 	if l.Char == 0 {
-		return tokens.NewToken(tokens.EOF, "", "null"), nil
+		return tokens.NewToken(tokens.EOF, "", "null", l.Line), nil
 	}
 
 	if utils.IsWhitespace(l.Char) {
-		return tokens.NewToken(tokens.IGNORE, "", "null"), nil
+		return tokens.NewToken(tokens.IGNORE, "", "null", l.Line), nil
 	}
 
 	if utf8.Valid([]byte{l.Char}) {
@@ -84,7 +84,7 @@ func (l *Lexer) Lex() (*tokens.Token, *LexerError) {
 				return tkn, err
 			}
 
-			return tokens.NewToken(*tknType, string(l.Char), "null"), nil
+			return tokens.NewToken(*tknType, string(l.Char), "null", l.Line), nil
 		} else {
 			if l.Char == '"' {
 				tkn, err := l.LexStrLiterals()
@@ -99,5 +99,5 @@ func (l *Lexer) Lex() (*tokens.Token, *LexerError) {
 		}
 	}
 
-	return tokens.NewToken(tokens.ILLEGAL, "", string(l.Char)), nil
+	return tokens.NewToken(tokens.ILLEGAL, "", string(l.Char), l.Line), nil
 }

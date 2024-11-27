@@ -31,7 +31,11 @@ func (p *Parser) Curr() tokens.Token {
 }
 
 func (p *Parser) Peek() tokens.Token {
-	return p.Tokens[p.Idx]
+	if !p.IsAtEnd() {
+		return p.Tokens[p.Idx]
+	} else {
+		return p.Curr()
+	}
 }
 
 func (p *Parser) IsAtEnd() bool {
@@ -61,19 +65,93 @@ func (p *Parser) Parse() (*ast.AstNode, *ParserError) {
 	}
 
 	p.Idx++
-	return p.equality()
+	return p.EqualityRule()
 }
 
-func (p *Parser) equality() (*ast.AstNode, *ParserError) {
-	return p.comparison()
+func (p *Parser) EqualityRule() (*ast.AstNode, *ParserError) {
+	expr, err := p.ComparisonRule()
+	if err != nil {
+		return nil, err
+	}
+
+	if expr != nil {
+		token := p.Peek()
+		expectedOperators := []tokens.TokenType{tokens.EQUAL_EQUAL, tokens.BANG_EQUAL}
+
+		if utils.HasValueArray(expectedOperators, token.Type) {
+			// advance to operator token
+			p.Advance()
+
+			if p.Peek().Line != token.Line {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			}
+
+			// advance to RHS
+			p.Advance()
+
+			right, err := p.EqualityRule()
+			if err != nil {
+				return nil, err
+			}
+
+			if right == nil {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			} else {
+				if right.Expr.ParseExpr() == "null" {
+					return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+				}
+
+				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr, p.Curr().Line))
+			}
+		}
+	}
+
+	return expr, nil
 }
 
-func (p *Parser) comparison() (*ast.AstNode, *ParserError) {
-	return p.term()
+func (p *Parser) ComparisonRule() (*ast.AstNode, *ParserError) {
+	expr, err := p.TermRule()
+	if err != nil {
+		return nil, err
+	}
+
+	if expr != nil {
+		token := p.Peek()
+		expectedOperators := []tokens.TokenType{tokens.LESS, tokens.LESS_EQUAL, tokens.GREATER, tokens.GREATER_EQUAL}
+
+		if utils.HasValueArray(expectedOperators, token.Type) {
+			// advance to operator token
+			p.Advance()
+
+			if p.Peek().Line != token.Line {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			}
+
+			// advance to RHS
+			p.Advance()
+
+			right, err := p.ComparisonRule()
+			if err != nil {
+				return nil, err
+			}
+
+			if right == nil {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			} else {
+				if right.Expr.ParseExpr() == "null" {
+					return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+				}
+
+				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr, p.Curr().Line))
+			}
+		}
+	}
+
+	return expr, nil
 }
 
-func (p *Parser) term() (*ast.AstNode, *ParserError) {
-	expr, err := p.factor()
+func (p *Parser) TermRule() (*ast.AstNode, *ParserError) {
+	expr, err := p.FactorRule()
 	if err != nil {
 		return nil, err
 	}
@@ -84,16 +162,29 @@ func (p *Parser) term() (*ast.AstNode, *ParserError) {
 		expectedOperators := []tokens.TokenType{tokens.PLUS, tokens.MINUS}
 
 		if utils.HasValueArray(expectedOperators, token.Type) {
-			p.Advance()
+			// advance to operator token
 			p.Advance()
 
-			right, err := p.term()
+			if p.Peek().Line != token.Line {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			}
+
+			// advance to RHS
+			p.Advance()
+
+			right, err := p.TermRule()
 			if err != nil {
 				return nil, err
 			}
 
-			if right != nil {
-				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr))
+			if right == nil {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			} else {
+				if right.Expr.ParseExpr() == "null" {
+					return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+				}
+
+				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr, p.Curr().Line))
 			}
 		}
 	}
@@ -101,8 +192,8 @@ func (p *Parser) term() (*ast.AstNode, *ParserError) {
 	return expr, nil
 }
 
-func (p *Parser) factor() (*ast.AstNode, *ParserError) {
-	expr, err := p.unary()
+func (p *Parser) FactorRule() (*ast.AstNode, *ParserError) {
+	expr, err := p.UnaryRule()
 	if err != nil {
 		return nil, err
 	}
@@ -113,65 +204,77 @@ func (p *Parser) factor() (*ast.AstNode, *ParserError) {
 		expectedOperators := []tokens.TokenType{tokens.STAR, tokens.SLASH}
 
 		if utils.HasValueArray(expectedOperators, token.Type) {
-			p.Advance()
+			// advance to operator token
 			p.Advance()
 
-			right, err := p.factor()
+			if p.Peek().Line != token.Line {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			}
+
+			// advance to RHS
+			p.Advance()
+
+			right, err := p.FactorRule()
 			if err != nil {
 				return nil, err
 			}
 
-			if right != nil {
-				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr))
+			if right == nil {
+				return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+			} else {
+				if right.Expr.ParseExpr() == "null" {
+					return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
+				}
+
+				expr = ast.NewAstNode(ast.BINARY, ast.NewBinaryExpr(expr.Expr, token.Type, right.Expr, p.Curr().Line))
 			}
+
 		}
 	}
 
 	return expr, nil
 }
 
-func (p *Parser) unary() (*ast.AstNode, *ParserError) {
-	operator := p.Curr()
+func (p *Parser) UnaryRule() (*ast.AstNode, *ParserError) {
 	expectedOperators := []tokens.TokenType{tokens.BANG, tokens.MINUS}
 
-	if utils.HasValueArray(expectedOperators, operator.Type) {
+	if utils.HasValueArray(expectedOperators, p.Curr().Type) {
 		node, err := p.Parse()
 		if err != nil {
 			return nil, err
 		}
 
 		if node != nil {
-			return ast.NewAstNode(ast.UNARY, ast.NewUnaryExpr(operator.Type, node.Expr)), nil
+			return ast.NewAstNode(ast.UNARY, ast.NewUnaryExpr(p.Curr().Type, node.Expr, p.Curr().Line)), nil
 		}
 
-		return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression")
+		return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
 	}
 
-	return p.primary()
+	return p.PrimaryRule()
 }
 
-func (p *Parser) primary() (*ast.AstNode, *ParserError) {
-	curr := p.Curr()
+func (p *Parser) PrimaryRule() (*ast.AstNode, *ParserError) {
 	canIgnore := []tokens.TokenType{tokens.EOF, tokens.ILLEGAL, tokens.IGNORE}
 
-	if utils.HasValueArray(canIgnore, curr.Type) {
+	if utils.HasValueArray(canIgnore, p.Curr().Type) {
 		return nil, nil
 	}
 
-	if curr.Type == tokens.LEFT_PAREN {
+	if p.Curr().Type == tokens.LEFT_PAREN {
 		node, err := p.Parse()
 		if err != nil {
 			return nil, err
 		}
 
 		if node != nil {
-			err := NewParserError(TOKEN_EXPECTED, "expected ')' after this expression")
+			err := NewParserError(TOKEN_EXPECTED, "expected ')' after this expression", p.Curr().Lexeme, p.Curr().Line)
 			p.Consume(tokens.RIGHT_PAREN, *err)
-			return ast.NewAstNode(ast.GROUPING, ast.NewGroupingExpr(node.Expr)), nil
+			return ast.NewAstNode(ast.GROUPING, ast.NewGroupingExpr(node.Expr, p.Curr().Line)), nil
 		}
 
-		return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression")
+		return nil, NewParserError(EXPRESSION_EXPECTED, "expected expression", p.Curr().Lexeme, p.Curr().Line)
 	}
 
-	return ast.NewAstNode(ast.LITERAL, ast.NewLiteralExpr(curr.Type, curr.Literal)), nil
+	return ast.NewAstNode(ast.LITERAL, ast.NewLiteralExpr(p.Curr().Type, p.Curr().Literal, p.Curr().Line)), nil
 }
