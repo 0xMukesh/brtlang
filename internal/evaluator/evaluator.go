@@ -179,6 +179,42 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*RuntimeValue
 		}
 
 		return NewRuntimeValue(leftNum / rightNum), nil
+	case tokens.LESS:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return NewRuntimeValue(leftNum < rightNum), nil
+	case tokens.LESS_EQUAL:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return NewRuntimeValue(leftNum <= rightNum), nil
+	case tokens.GREATER:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return NewRuntimeValue(leftNum > rightNum), nil
+	case tokens.GREATER_EQUAL:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return NewRuntimeValue(leftNum >= rightNum), nil
 	default:
 		return nil, NewRuntimeError("invalid binary expression operator", binaryExpr.Operator.Literal(), binaryExpr.Line)
 	}

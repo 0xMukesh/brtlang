@@ -120,7 +120,7 @@ func (p *Parser) equalityRule() (*ast.AstNode, *ParserError) {
 
 			p.advance()
 
-			right, err := p.equalityRule()
+			right, err := p.comparisonRule()
 			if err != nil {
 				return nil, err
 			}
@@ -156,7 +156,7 @@ func (p *Parser) comparisonRule() (*ast.AstNode, *ParserError) {
 
 			p.advance()
 
-			right, err := p.comparisonRule()
+			right, err := p.subtractionRule()
 			if err != nil {
 				return nil, err
 			}
@@ -192,7 +192,7 @@ func (p *Parser) subtractionRule() (*ast.AstNode, *ParserError) {
 
 			p.advance()
 
-			right, err := p.subtractionRule()
+			right, err := p.additionRule()
 			if err != nil {
 				return nil, err
 			}
@@ -228,7 +228,7 @@ func (p *Parser) additionRule() (*ast.AstNode, *ParserError) {
 
 			p.advance()
 
-			right, err := p.additionRule()
+			right, err := p.multiplicationRule()
 			if err != nil {
 				return nil, err
 			}
@@ -264,7 +264,7 @@ func (p *Parser) multiplicationRule() (*ast.AstNode, *ParserError) {
 
 			p.advance()
 
-			right, err := p.multiplicationRule()
+			right, err := p.divisionRule()
 			if err != nil {
 				return nil, err
 			}
@@ -301,7 +301,7 @@ func (p *Parser) divisionRule() (*ast.AstNode, *ParserError) {
 
 			p.advance()
 
-			right, err := p.divisionRule()
+			right, err := p.unaryRule()
 			if err != nil {
 				return nil, err
 			}
