@@ -215,6 +215,10 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*RuntimeValue
 		}
 
 		return NewRuntimeValue(leftNum >= rightNum), nil
+	case tokens.EQUAL_EQUAL:
+		return NewRuntimeValue(left.Value == right.Value), nil
+	case tokens.BANG_EQUAL:
+		return NewRuntimeValue(left.Value != right.Value), nil
 	default:
 		return nil, NewRuntimeError("invalid binary expression operator", binaryExpr.Operator.Literal(), binaryExpr.Line)
 	}
