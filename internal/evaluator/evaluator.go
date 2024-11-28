@@ -1,7 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
@@ -102,7 +101,11 @@ func (e *Evaluator) evaluteUnaryExpr(unaryExpr ast.UnaryExpr) (*RuntimeValue, *R
 	}
 
 	if unaryExpr.Operator == tokens.MINUS {
-		val = NewRuntimeValue(fmt.Sprintf("%s%v", unaryExpr.Operator.Literal(), val))
+		valNum, isNum := val.Value.(float64)
+		if !isNum {
+			return nil, NewRuntimeError("operand must be a number", unaryExpr.Operator.Literal(), unaryExpr.Line)
+		}
+		val = NewRuntimeValue(-1 * valNum)
 	} else {
 		if val.Value != true && val.Value != false {
 			val = NewRuntimeValue(false)
@@ -134,13 +137,48 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*RuntimeValue
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
-		if isLeftStr && isRightStr {
+		if isLeftStr {
+			if !isRightStr {
+				return nil, NewRuntimeError("operand must be a string", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			}
+
 			return NewRuntimeValue(leftStr + rightStr), nil
-		} else if isLeftNum && isRightNum {
+		} else if isLeftNum {
+			if !isRightNum {
+				return nil, NewRuntimeError("operand must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			}
+
 			return NewRuntimeValue(leftNum + rightNum), nil
 		} else {
-			return nil, NewRuntimeError("either both of the operands must be strings or else both of them must be numbers", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, NewRuntimeError("either both of the operands must be a string or else both of them must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
+	case tokens.MINUS:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return NewRuntimeValue(leftNum - rightNum), nil
+	case tokens.STAR:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return NewRuntimeValue(leftNum * rightNum), nil
+	case tokens.SLASH:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return NewRuntimeValue(leftNum / rightNum), nil
 	default:
 		return nil, NewRuntimeError("invalid binary expression operator", binaryExpr.Operator.Literal(), binaryExpr.Line)
 	}

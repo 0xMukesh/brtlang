@@ -8,6 +8,7 @@ import (
 	"github.com/0xmukesh/interpreter/internal/lexer"
 	"github.com/0xmukesh/interpreter/internal/parser"
 	"github.com/0xmukesh/interpreter/internal/tokens"
+	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
 func EvaluteCmdHandler(src []byte) {
@@ -15,7 +16,7 @@ func EvaluteCmdHandler(src []byte) {
 
 	tkns, lErr := l.LexAll()
 	if lErr != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", lErr.Error())
+		utils.EPrint(fmt.Sprintf("%s\n", lErr.Error()))
 	}
 
 	hasLexicalErrs := 1
@@ -33,7 +34,7 @@ func EvaluteCmdHandler(src []byte) {
 
 	ast, pErr := p.BuildAst()
 	if pErr != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", pErr.Error())
+		utils.EPrint(fmt.Sprintf("%s\n", pErr.Error()))
 	}
 
 	e := evaluator.NewEvaluator(ast)
