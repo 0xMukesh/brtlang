@@ -26,6 +26,8 @@ func main() {
 		commands.TokenizeCmdHandler(src)
 	} else if command == "parse" {
 		commands.ParseCmdHandler(src)
+	} else if command == "evalute" {
+		commands.EvaluteCmdHandler(src)
 	} else {
 		utils.EPrint("invalid command")
 	}

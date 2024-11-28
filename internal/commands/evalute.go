@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/0xmukesh/interpreter/internal/evaluator"
 	"github.com/0xmukesh/interpreter/internal/lexer"
 	"github.com/0xmukesh/interpreter/internal/parser"
 	"github.com/0xmukesh/interpreter/internal/tokens"
-	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
-func ParseCmdHandler(src []byte) {
+func EvaluteCmdHandler(src []byte) {
 	l := lexer.NewLexer(src)
 
-	tkns, err := l.LexAll()
-	if err != nil {
-		utils.EPrint(fmt.Sprintf("[line %d] Error: %s\n", l.Line, err.Message))
+	tkns, lErr := l.LexAll()
+	if lErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", lErr.Error())
 	}
 
 	hasLexicalErrs := 1
@@ -31,14 +31,23 @@ func ParseCmdHandler(src []byte) {
 
 	p := parser.NewParser(tkns)
 
-	for range tkns {
-		node, err := p.Parse()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+	ast, pErr := p.BuildAst()
+	if pErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", pErr.Error())
+	}
+
+	e := evaluator.NewEvaluator(ast)
+
+	for {
+		val, eErr := e.Evaluate()
+		if eErr != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", eErr.Error())
 		}
 
-		if node != nil {
-			fmt.Printf("%+v\n", node.Expr.ParseExpr())
+		if val == nil {
+			break
+		} else {
+			fmt.Println(val.String())
 		}
 	}
 

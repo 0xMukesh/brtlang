@@ -23,12 +23,12 @@ func NewLexer(content []byte) *Lexer {
 	}
 }
 
-func (l *Lexer) IsAtEnd() bool {
+func (l *Lexer) isAtEnd() bool {
 	return l.Idx >= len(l.Content)
 }
 
-func (l *Lexer) Read() {
-	if l.IsAtEnd() {
+func (l *Lexer) read() {
+	if l.isAtEnd() {
 		l.Char = 0
 		return
 	}
@@ -38,12 +38,30 @@ func (l *Lexer) Read() {
 	l.Idx++
 }
 
-func (l *Lexer) Peek() byte {
-	if l.IsAtEnd() {
+func (l *Lexer) peek() byte {
+	if l.isAtEnd() {
 		return 0
 	}
 
 	return l.Content[l.Idx]
+}
+
+func (l *Lexer) LexAll() ([]tokens.Token, *LexerError) {
+	var tkns []tokens.Token
+
+	for !l.isAtEnd() {
+		l.read()
+		tkn, err := l.Lex()
+		if err != nil {
+			return nil, err
+		}
+
+		if tkn != nil {
+			tkns = append(tkns, *tkn)
+		}
+	}
+
+	return tkns, nil
 }
 
 func (l *Lexer) Lex() (*tokens.Token, *LexerError) {

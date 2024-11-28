@@ -28,7 +28,7 @@ func HasValueMap[K comparable, V comparable](dict map[K]V, e V) (*K, bool) {
 
 func HasValueArray[E comparable](arr []E, e E) bool {
 	for _, v := range arr {
-		if e == v {
+		if v == e {
 			return true
 		}
 	}

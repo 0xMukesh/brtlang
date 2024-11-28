@@ -21,6 +21,6 @@ func NewParserError(msg string, at string, line int) *ParserError {
 	}
 }
 
-func (e ParserError) String() string {
+func (e ParserError) Error() string {
 	return fmt.Sprintf("[line %d] Error at '%s': %s", e.Line, e.At, e.Message)
 }

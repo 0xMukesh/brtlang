@@ -15,13 +15,13 @@ func (l *Lexer) LexStrLiterals() (*tokens.Token, *LexerError) {
 	closingQuoteFound := false
 
 	for {
-		nextChar := l.Peek()
+		nextChar := l.peek()
 
 		if nextChar == '\n' || nextChar == 0 {
 			break
 		}
 
-		l.Read()
+		l.read()
 
 		strLiteral += string(l.Char)
 
@@ -32,7 +32,7 @@ func (l *Lexer) LexStrLiterals() (*tokens.Token, *LexerError) {
 	}
 
 	if !closingQuoteFound {
-		return nil, NewLexerError(UNTERMINATED_STRING, "Unterminated string.", l.Line)
+		return nil, NewLexerError("Unterminated string.", l.Line)
 	}
 
 	return tokens.NewToken(tokens.STRING, strLiteral, strLiteral[1:len(strLiteral)-1], l.Line), nil
@@ -44,7 +44,7 @@ func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 	decimalPointFound := false
 
 	for {
-		nextChar := l.Peek()
+		nextChar := l.peek()
 
 		if !(unicode.IsDigit(rune(nextChar)) || nextChar == '.') {
 			break
@@ -52,18 +52,18 @@ func (l *Lexer) LexNumLiterals() (*tokens.Token, *LexerError) {
 
 		if nextChar == '.' {
 			if decimalPointFound {
-				return nil, NewLexerError(UNTERMINATED_NUMBER, "Unterminated number.", l.Line)
+				return nil, NewLexerError("Unterminated number.", l.Line)
 			}
 			decimalPointFound = true
 		}
 
-		l.Read()
+		l.read()
 
 		numLiteral += string(l.Char)
 	}
 
 	if strings.HasSuffix(numLiteral, ".") {
-		return nil, NewLexerError(UNTERMINATED_NUMBER, "Unterminated number.", l.Line)
+		return nil, NewLexerError("Unterminated number.", l.Line)
 	}
 
 	var literal string
@@ -82,7 +82,7 @@ func (l *Lexer) LexIdentifier() (*tokens.Token, *LexerError) {
 	identLiteral += string(l.Char)
 
 	for {
-		nextChar := l.Peek()
+		nextChar := l.peek()
 
 		_, existsInTknMap := utils.HasValueMap(tokens.TknLiteralMapping, string(nextChar))
 
@@ -90,7 +90,7 @@ func (l *Lexer) LexIdentifier() (*tokens.Token, *LexerError) {
 			break
 		}
 
-		l.Read()
+		l.read()
 		identLiteral += string(l.Char)
 	}
 
