@@ -9,16 +9,16 @@ import (
 )
 
 type Evaluator struct {
-	Ast ast.Ast
-	Env *runtime.Environment
-	Idx int
+	Ast     ast.Ast
+	Runtime *runtime.Runtime
+	Idx     int
 }
 
-func NewEvaluator(ast ast.Ast, env *runtime.Environment) *Evaluator {
+func NewEvaluator(ast ast.Ast, runtime *runtime.Runtime) *Evaluator {
 	return &Evaluator{
-		Ast: ast,
-		Env: env,
-		Idx: 0,
+		Ast:     ast,
+		Runtime: runtime,
+		Idx:     0,
 	}
 }
 
@@ -102,7 +102,11 @@ func (e *Evaluator) evaluteLiteralExpr(literalExpr ast.LiteralExpr) (*runtime.Ru
 	case tokens.NIL:
 		return runtime.NewRuntimeValue(nil), nil
 	case tokens.IDENTIFIER:
-		val := e.Env.GetVar(literalExpr.Value)
+		env := e.Runtime.CurrEnv()
+
+		var val *runtime.RuntimeValue
+		val = env.GetVar(literalExpr.Value)
+
 		if val != nil {
 			return runtime.NewRuntimeValue(val.Value), nil
 		}

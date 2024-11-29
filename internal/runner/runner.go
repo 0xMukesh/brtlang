@@ -11,15 +11,15 @@ import (
 
 type Runner struct {
 	Ast       ast.Ast
-	Env       *runtime.Environment
+	Runtime   *runtime.Runtime
 	Evaluator *evaluator.Evaluator
 	Idx       int
 }
 
-func NewRunner(ast ast.Ast, env *runtime.Environment, evaluator *evaluator.Evaluator) *Runner {
+func NewRunner(ast ast.Ast, runtime *runtime.Runtime, evaluator *evaluator.Evaluator) *Runner {
 	return &Runner{
 		Ast:       ast,
-		Env:       env,
+		Runtime:   runtime,
 		Evaluator: evaluator,
 		Idx:       0,
 	}
@@ -43,41 +43,56 @@ func (r *Runner) curr() ast.AstNode {
 	}
 }
 
+func (r *Runner) RunNode(node ast.AstNode) {
+	expr, isExpr := node.Value.(ast.Expr)
+
+	if !isExpr {
+		printStmt, isPrintStmt := node.Value.(ast.PrintStmt)
+		varAssignStmt, isVarAssignStmt := node.Value.(ast.VarAssignStmt)
+		createBlockStmt, isCreateBlockStmt := node.Value.(ast.CreateBlockStmt)
+		_, isCloseBlockStmt := node.Value.(ast.CloseBlockStmt)
+
+		if isPrintStmt {
+			val, err := r.Evaluator.EvaluateExpr(printStmt.GetExpr())
+			if err != nil {
+				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+			}
+
+			fmt.Println(val)
+		} else if isVarAssignStmt {
+			val, err := r.Evaluator.EvaluateExpr(varAssignStmt.Expr)
+			if err != nil {
+				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+			}
+
+			if val != nil {
+				env := r.Runtime.CurrEnv()
+				env.SetVar(varAssignStmt.Name, *runtime.NewRuntimeValue(val.Value))
+			}
+		} else if isCreateBlockStmt {
+			localEnvVars := runtime.RuntimeVarMapping{}
+			localEnv := runtime.NewEnvironment(localEnvVars)
+			r.Runtime.AddNewEnv(localEnv)
+
+			for _, node := range createBlockStmt.Nodes {
+				r.RunNode(node)
+			}
+		} else if isCloseBlockStmt {
+			r.Runtime.RemoveLastEnv()
+		}
+	} else {
+		_, err := r.Evaluator.EvaluateExpr(expr)
+		if err != nil {
+			utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+		}
+	}
+}
+
 func (r *Runner) Run() {
 	curr := r.curr()
 
 	if !r.IsAtEnd() {
-		expr, isExpr := curr.Value.(ast.Expr)
-		stmt, _ := curr.Value.(ast.Stmt)
-
-		if !isExpr {
-			_, isPrintStmt := curr.Value.(ast.PrintStmt)
-			varAssignStmt, isVarAssignStmt := curr.Value.(ast.VarAssignStmt)
-
-			if isPrintStmt {
-				val, err := r.Evaluator.EvaluateExpr(stmt.GetExpr())
-				if err != nil {
-					utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
-				}
-
-				fmt.Println(val)
-			} else if isVarAssignStmt {
-				val, err := r.Evaluator.EvaluateExpr(varAssignStmt.Expr)
-				if err != nil {
-					utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
-				}
-
-				if val != nil {
-					r.Env.Vars[varAssignStmt.Name] = *runtime.NewRuntimeValue(val.Value)
-				}
-			}
-		} else {
-			_, err := r.Evaluator.EvaluateExpr(expr)
-			if err != nil {
-				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
-			}
-		}
-
+		r.RunNode(curr)
 		r.advance()
 	}
 }

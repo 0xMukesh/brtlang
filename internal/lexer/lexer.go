@@ -9,22 +9,22 @@ import (
 )
 
 type Lexer struct {
-	Content []byte
-	Line    int
-	Idx     int
-	Char    byte
+	Src  []byte
+	Line int
+	Idx  int
+	Char byte
 }
 
-func NewLexer(content []byte) *Lexer {
+func NewLexer(src []byte) *Lexer {
 	return &Lexer{
-		Content: content,
-		Idx:     0,
-		Char:    0,
+		Src:  src,
+		Idx:  0,
+		Char: 0,
 	}
 }
 
 func (l *Lexer) isAtEnd() bool {
-	return l.Idx >= len(l.Content)
+	return l.Idx >= len(l.Src)
 }
 
 func (l *Lexer) read() {
@@ -33,8 +33,8 @@ func (l *Lexer) read() {
 		return
 	}
 
-	l.Char = l.Content[l.Idx]
-	l.Line = utils.FindLineNumber(l.Idx, l.Content)
+	l.Char = l.Src[l.Idx]
+	l.Line = utils.FindLineNumber(l.Idx, l.Src)
 	l.Idx++
 }
 
@@ -43,7 +43,7 @@ func (l *Lexer) peek() byte {
 		return 0
 	}
 
-	return l.Content[l.Idx]
+	return l.Src[l.Idx]
 }
 
 func (l *Lexer) LexAll() ([]tokens.Token, *LexerError) {

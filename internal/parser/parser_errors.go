@@ -3,8 +3,16 @@ package parser
 import "fmt"
 
 const (
-	EXPRESSION_EXPECTED = "expression expected"
-	TOKEN_EXPECTED      = ""
+	EXPRESSION_EXPECTED                  = "expression expected"
+	EXPRESSION_AFTER_ASSIGNMENT_EXPECTED = "expression after assignment expected"
+	VARIABLE_NAME_EXPECTED               = "variable name expected"
+
+	MISSING_SEMICOLON = "missing ';'"
+	MISSING_RPAREN    = "missing ')'"
+	MISSING_RBRACE    = "missing '}'"
+
+	INVALID_VARIABLE_NAME = "invalid variable name"
+	INVALID_EXPRESSION    = "invalid expression"
 )
 
 type ParserError struct {

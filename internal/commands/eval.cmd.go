@@ -5,32 +5,16 @@ import (
 	"os"
 
 	"github.com/0xmukesh/interpreter/internal/evaluator"
+	"github.com/0xmukesh/interpreter/internal/helpers"
 	"github.com/0xmukesh/interpreter/internal/lexer"
 	"github.com/0xmukesh/interpreter/internal/parser"
 	"github.com/0xmukesh/interpreter/internal/runtime"
-	"github.com/0xmukesh/interpreter/internal/tokens"
 	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
 func EvaluteCmdHandler(src []byte) {
 	l := lexer.NewLexer(src)
-
-	tkns, lErr := l.LexAll()
-	if lErr != nil {
-		utils.EPrint(fmt.Sprintf("%s\n", lErr.Error()))
-	}
-
-	hasLexicalErrs := 1
-
-	for i, tkn := range tkns {
-		if tkn.Type == tokens.IGNORE {
-			tkns = append(tkns[:i], tkns[i+1:]...)
-		} else if tkn.Type == tokens.ILLEGAL {
-			fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", l.Line, tkn.Literal)
-			hasLexicalErrs *= 0
-		}
-	}
-
+	tkns := helpers.ProcessTokens(l, true)
 	p := parser.NewParser(tkns)
 
 	ast, pErr := p.BuildAst()
@@ -39,8 +23,9 @@ func EvaluteCmdHandler(src []byte) {
 	}
 
 	vars := map[string]runtime.RuntimeValue{}
-	env := runtime.NewEnvironment(vars)
-	e := evaluator.NewEvaluator(ast, env)
+	globaEnv := runtime.NewEnvironment(vars)
+	runtime := runtime.NewRuntime([]*runtime.Environment{globaEnv})
+	e := evaluator.NewEvaluator(ast, runtime)
 
 	for {
 		val, eErr := e.Evaluate()
@@ -50,14 +35,8 @@ func EvaluteCmdHandler(src []byte) {
 
 		if val == nil {
 			break
-		} else {
-			fmt.Println(val.String())
 		}
-	}
 
-	if hasLexicalErrs == 0 {
-		os.Exit(65)
-	} else {
-		os.Exit(0)
+		fmt.Println(val.String())
 	}
 }

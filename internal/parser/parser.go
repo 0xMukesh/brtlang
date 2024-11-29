@@ -70,7 +70,7 @@ func (p *Parser) matchAndAdvance(expectedTypes ...tokens.TokenType) bool {
 
 func (p *Parser) consume(expected tokens.TokenType, err ParserError) {
 	if p.check(expected) {
-		p.Idx++
+		p.advance()
 		return
 	}
 
@@ -216,94 +216,22 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return nil, nil
 	}
 
-	if p.curr().Type == tokens.LEFT_PAREN {
-		node, err := p.Parse()
-		if err != nil {
-			return nil, err
-		}
-
-		if node != nil {
-			err := NewParserError("expected ')' after this expression", p.curr().Lexeme, p.curr().Line)
-			p.consume(tokens.RIGHT_PAREN, *err)
-
-			expr, err := p.extractExpr(*node)
-			if err != nil {
-				return nil, err
-			}
-
-			return ast.NewAstNode(ast.EXPR, ast.NewGroupingExpr(expr, p.curr().Line)), nil
-		}
-
-		return nil, NewParserError("expected expression", p.curr().Lexeme, p.curr().Line)
+	switch p.curr().Type {
+	case tokens.LEFT_PAREN:
+		return p.parseGroupingExpr()
+	case tokens.LEFT_BRACE:
+		return p.parseCreateBlockStmt()
+	case tokens.PRINT:
+		return p.parsePrintStmt()
+	case tokens.VAR:
+		return p.parseVarAssignStmt()
 	}
 
-	if p.curr().Type.IsReserved() {
-		if p.curr().Type == tokens.PRINT {
-			node, err := p.Parse()
-			if err != nil {
-				return nil, err
-			}
+	literal := p.curr().Lexeme
 
-			if node != nil {
-				err := NewParserError("expected ';' after print statement", p.curr().Lexeme, p.curr().Line)
-				p.consume(tokens.SEMICOLON, *err)
-
-				expr, err := p.extractExpr(*node)
-				if err != nil {
-					return nil, err
-				}
-
-				return ast.NewAstNode(ast.STMT, ast.NewPrintStmt(expr, p.curr().Line)), nil
-			} else {
-				return nil, NewParserError("expected expression after print statement", p.curr().Lexeme, p.curr().Line)
-			}
-		} else if p.curr().Type == tokens.VAR {
-			varNameNode, err := p.Parse()
-			if err != nil {
-				return nil, err
-			}
-			if varNameNode == nil {
-				return nil, NewParserError("missing variable name after `var`", p.curr().Lexeme, p.curr().Line)
-			}
-
-			varNameExpr := varNameNode.ExtractExpr()
-			if varNameExpr == nil {
-				return nil, NewParserError("invalid variable name identifier", p.curr().Lexeme, p.curr().Line)
-			}
-
-			varNameLiteralExpr, isLiteralExpr := varNameExpr.(ast.LiteralExpr)
-			if !isLiteralExpr {
-				return nil, NewParserError("invalid variable name identifier", p.curr().Lexeme, p.curr().Line)
-			}
-
-			varName := varNameLiteralExpr.Value
-
-			err = NewParserError("expected '=' after variable name identifier", p.curr().Lexeme, p.curr().Line)
-			p.consume(tokens.EQUAL, *err)
-
-			varValueNode, err := p.Parse()
-			if err != nil {
-				return nil, err
-			}
-
-			if varValueNode == nil {
-				return nil, NewParserError("missing assignment value to the variable", p.curr().Lexeme, p.curr().Line)
-			}
-
-			varValueExpr := varValueNode.ExtractExpr()
-
-			if varValueExpr == nil {
-				return nil, NewParserError("invalid variable value assignment", p.curr().Lexeme, p.curr().Line)
-			}
-
-			err = NewParserError("missing ';' after a statement", p.curr().Lexeme, p.curr().Line)
-			p.consume(tokens.SEMICOLON, *err)
-
-			return ast.NewAstNode(ast.STMT, ast.NewVarAssignStmt(varName, varValueExpr, p.curr().Line)), nil
-		}
+	if p.curr().Type == tokens.STRING {
+		literal = strings.TrimSuffix(strings.TrimPrefix(p.curr().Lexeme, `"`), `"`)
 	}
-
-	literal := strings.TrimSuffix(strings.TrimPrefix(p.curr().Lexeme, `"`), `"`)
 
 	return ast.NewAstNode(ast.EXPR, ast.NewLiteralExpr(p.curr().Type, literal, p.curr().Line)), nil
 }

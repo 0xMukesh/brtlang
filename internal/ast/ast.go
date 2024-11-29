@@ -25,15 +25,14 @@ func (n AstNode) ExtractExpr() Expr {
 	return value
 }
 
-func (n AstNode) ExtractStmtExpr() *Expr {
+func (n AstNode) ExtractStmtExpr() Expr {
 	value, ok := n.Value.(Stmt)
 	if !ok {
 		return nil
 	}
 
 	expr := value.GetExpr()
-
-	return &expr
+	return expr
 }
 
 type Ast []AstNode

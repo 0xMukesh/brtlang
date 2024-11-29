@@ -8,6 +8,8 @@ type RuntimeValue struct {
 	Value interface{}
 }
 
+type RuntimeVarMapping = map[string]RuntimeValue
+
 func NewRuntimeValue(value interface{}) *RuntimeValue {
 	return &RuntimeValue{
 		Value: value,
@@ -18,10 +20,10 @@ func (e RuntimeValue) String() string {
 }
 
 type Environment struct {
-	Vars map[string]RuntimeValue
+	Vars RuntimeVarMapping
 }
 
-func NewEnvironment(vars map[string]RuntimeValue) *Environment {
+func NewEnvironment(vars RuntimeVarMapping) *Environment {
 	return &Environment{
 		Vars: vars,
 	}
@@ -34,15 +36,27 @@ func (e *Environment) GetVar(name string) *RuntimeValue {
 
 	return &val
 }
-
-type Runtime struct {
-	Envs []Environment
+func (e *Environment) SetVar(name string, value RuntimeValue) {
+	e.Vars[name] = value
 }
 
-func NewRuntime(envs []Environment) *Runtime {
+type Runtime struct {
+	Envs []*Environment
+}
+
+func NewRuntime(envs []*Environment) *Runtime {
 	return &Runtime{
 		Envs: envs,
 	}
+}
+func (r *Runtime) AddNewEnv(env *Environment) {
+	r.Envs = append(r.Envs, env)
+}
+func (r *Runtime) RemoveLastEnv() {
+	r.Envs = r.Envs[:len(r.Envs)-1]
+}
+func (r *Runtime) CurrEnv() *Environment {
+	return r.Envs[len(r.Envs)-1]
 }
 
 type RuntimeError struct {

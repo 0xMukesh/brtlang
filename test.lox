@@ -1,2 +1,8 @@
-var doesAmudallapalliLikeKinderJoy = false;
-print !doesKarthikeyaLikeKinderJoy;
+{
+    var world = "before";
+    {
+        var world = "after";
+        print world;
+    }
+    print world;
+}
