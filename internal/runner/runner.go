@@ -59,6 +59,19 @@ func (r *Runner) RunNode(node ast.AstNode) {
 			}
 
 			fmt.Println(val)
+		} else if isCreateBlockStmt {
+			localEnvVars := make(map[string]runtime.RuntimeValue)
+			for k, v := range r.Runtime.CurrEnv().Vars {
+				localEnvVars[k] = v
+			}
+			localEnv := runtime.NewEnvironment(localEnvVars)
+			r.Runtime.AddNewEnv(*localEnv)
+
+			for _, node := range createBlockStmt.Nodes {
+				r.RunNode(node)
+			}
+		} else if isCloseBlockStmt {
+			r.Runtime.RemoveLastEnv()
 		} else if isVarAssignStmt {
 			val, err := r.Evaluator.EvaluateExpr(varAssignStmt.Expr)
 			if err != nil {
@@ -69,16 +82,6 @@ func (r *Runner) RunNode(node ast.AstNode) {
 				env := r.Runtime.CurrEnv()
 				env.SetVar(varAssignStmt.Name, *runtime.NewRuntimeValue(val.Value))
 			}
-		} else if isCreateBlockStmt {
-			localEnvVars := runtime.RuntimeVarMapping{}
-			localEnv := runtime.NewEnvironment(localEnvVars)
-			r.Runtime.AddNewEnv(localEnv)
-
-			for _, node := range createBlockStmt.Nodes {
-				r.RunNode(node)
-			}
-		} else if isCloseBlockStmt {
-			r.Runtime.RemoveLastEnv()
 		}
 	} else {
 		_, err := r.Evaluator.EvaluateExpr(expr)

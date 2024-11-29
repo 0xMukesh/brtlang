@@ -24,7 +24,7 @@ func RunCmdHandler(src []byte) {
 
 	vars := runtime.RuntimeVarMapping{}
 	globaEnv := runtime.NewEnvironment(vars)
-	runtime := runtime.NewRuntime([]*runtime.Environment{globaEnv})
+	runtime := runtime.NewRuntime(&[]runtime.Environment{*globaEnv})
 	e := evaluator.NewEvaluator(ast, runtime)
 	r := runner.NewRunner(ast, runtime, e)
 

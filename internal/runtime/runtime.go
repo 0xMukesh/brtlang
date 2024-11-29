@@ -41,22 +41,29 @@ func (e *Environment) SetVar(name string, value RuntimeValue) {
 }
 
 type Runtime struct {
-	Envs []*Environment
+	Envs *[]Environment
 }
 
-func NewRuntime(envs []*Environment) *Runtime {
+func NewRuntime(envs *[]Environment) *Runtime {
 	return &Runtime{
 		Envs: envs,
 	}
 }
-func (r *Runtime) AddNewEnv(env *Environment) {
-	r.Envs = append(r.Envs, env)
+func (r *Runtime) AddNewEnv(env Environment) {
+	if r.Envs != nil {
+		*r.Envs = append(*r.Envs, env)
+	}
 }
 func (r *Runtime) RemoveLastEnv() {
-	r.Envs = r.Envs[:len(r.Envs)-1]
+	if r.Envs != nil {
+		*r.Envs = (*r.Envs)[:len(*r.Envs)-1]
+	}
 }
 func (r *Runtime) CurrEnv() *Environment {
-	return r.Envs[len(r.Envs)-1]
+	if r.Envs != nil {
+		return &(*r.Envs)[len(*r.Envs)-1]
+	}
+	return nil
 }
 
 type RuntimeError struct {
