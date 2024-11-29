@@ -1,4 +1,4 @@
-package evaluator
+package runtime
 
 import (
 	"fmt"
@@ -13,9 +13,36 @@ func NewRuntimeValue(value interface{}) *RuntimeValue {
 		Value: value,
 	}
 }
-
 func (e RuntimeValue) String() string {
 	return fmt.Sprintf("%v", e.Value)
+}
+
+type Environment struct {
+	Vars map[string]RuntimeValue
+}
+
+func NewEnvironment(vars map[string]RuntimeValue) *Environment {
+	return &Environment{
+		Vars: vars,
+	}
+}
+func (e *Environment) GetVar(name string) *RuntimeValue {
+	val, ok := e.Vars[name]
+	if !ok {
+		return nil
+	}
+
+	return &val
+}
+
+type Runtime struct {
+	Envs []Environment
+}
+
+func NewRuntime(envs []Environment) *Runtime {
+	return &Runtime{
+		Envs: envs,
+	}
 }
 
 type RuntimeError struct {

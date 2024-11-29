@@ -4,17 +4,20 @@ import (
 	"strconv"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
+	"github.com/0xmukesh/interpreter/internal/runtime"
 	"github.com/0xmukesh/interpreter/internal/tokens"
 )
 
 type Evaluator struct {
 	Ast ast.Ast
+	Env *runtime.Environment
 	Idx int
 }
 
-func NewEvaluator(ast ast.Ast) *Evaluator {
+func NewEvaluator(ast ast.Ast, env *runtime.Environment) *Evaluator {
 	return &Evaluator{
 		Ast: ast,
+		Env: env,
 		Idx: 0,
 	}
 }
@@ -37,23 +40,36 @@ func (e *Evaluator) curr() ast.AstNode {
 	}
 }
 
-func (e *Evaluator) Evaluate() (*RuntimeValue, *RuntimeError) {
+func (e *Evaluator) Evaluate() (*runtime.RuntimeValue, *runtime.RuntimeError) {
 	curr := e.curr()
 
 	if e.isAtEnd() {
 		return nil, nil
 	}
 
-	val, err := e.evaluteExpr(curr.Expr)
-	if err != nil {
-		return nil, err
-	}
+	expr, isExpr := curr.Value.(ast.Expr)
+	stmt, _ := curr.Value.(ast.Stmt)
 
-	e.advance()
-	return val, nil
+	if isExpr {
+		val, err := e.EvaluateExpr(expr)
+		if err != nil {
+			return nil, err
+		}
+
+		e.advance()
+		return val, nil
+	} else {
+		stmtExpr := stmt.GetExpr()
+		val, err := e.EvaluateExpr(stmtExpr)
+		if err != nil {
+			return nil, err
+		}
+
+		return val, nil
+	}
 }
 
-func (e *Evaluator) evaluteExpr(expr ast.Expr) (*RuntimeValue, *RuntimeError) {
+func (e *Evaluator) EvaluateExpr(expr ast.Expr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
 	switch v := expr.(type) {
 	case ast.LiteralExpr:
 		return e.evaluteLiteralExpr(v)
@@ -68,34 +84,41 @@ func (e *Evaluator) evaluteExpr(expr ast.Expr) (*RuntimeValue, *RuntimeError) {
 	}
 }
 
-func (e *Evaluator) evaluteLiteralExpr(literalExpr ast.LiteralExpr) (*RuntimeValue, *RuntimeError) {
+func (e *Evaluator) evaluteLiteralExpr(literalExpr ast.LiteralExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
 	switch literalExpr.TokenType {
 	case tokens.STRING:
-		return NewRuntimeValue(literalExpr.Value), nil
+		return runtime.NewRuntimeValue(literalExpr.Value), nil
 	case tokens.NUMBER:
 		num, err := strconv.ParseFloat(literalExpr.Value, 64)
 		if err != nil {
-			return nil, NewRuntimeError(err.Error(), literalExpr.Value, literalExpr.Line)
+			return nil, runtime.NewRuntimeError(err.Error(), literalExpr.Value, literalExpr.Line)
 		}
 
-		return NewRuntimeValue(num), nil
+		return runtime.NewRuntimeValue(num), nil
 	case tokens.TRUE:
-		return NewRuntimeValue(true), nil
+		return runtime.NewRuntimeValue(true), nil
 	case tokens.FALSE:
-		return NewRuntimeValue(false), nil
+		return runtime.NewRuntimeValue(false), nil
 	case tokens.NIL:
-		return NewRuntimeValue(nil), nil
+		return runtime.NewRuntimeValue(nil), nil
+	case tokens.IDENTIFIER:
+		val := e.Env.GetVar(literalExpr.Value)
+		if val != nil {
+			return runtime.NewRuntimeValue(val.Value), nil
+		}
+
+		return nil, runtime.NewRuntimeError("undefined indentifier", literalExpr.Value, literalExpr.Line)
 	default:
 		return nil, nil
 	}
 }
 
-func (e *Evaluator) evaluteGroupingExpr(groupingExpr ast.GroupingExpr) (*RuntimeValue, *RuntimeError) {
-	return e.evaluteExpr(groupingExpr.Expr)
+func (e *Evaluator) evaluteGroupingExpr(groupingExpr ast.GroupingExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
+	return e.EvaluateExpr(groupingExpr.Expr)
 }
 
-func (e *Evaluator) evaluteUnaryExpr(unaryExpr ast.UnaryExpr) (*RuntimeValue, *RuntimeError) {
-	val, err := e.evaluteExpr(unaryExpr.Expr)
+func (e *Evaluator) evaluteUnaryExpr(unaryExpr ast.UnaryExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
+	val, err := e.EvaluateExpr(unaryExpr.Expr)
 	if err != nil {
 		return nil, err
 	}
@@ -103,27 +126,27 @@ func (e *Evaluator) evaluteUnaryExpr(unaryExpr ast.UnaryExpr) (*RuntimeValue, *R
 	if unaryExpr.Operator == tokens.MINUS {
 		valNum, isNum := val.Value.(float64)
 		if !isNum {
-			return nil, NewRuntimeError("operand must be a number", unaryExpr.Operator.Literal(), unaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operand must be a number", unaryExpr.Operator.Literal(), unaryExpr.Line)
 		}
-		val = NewRuntimeValue(-1 * valNum)
+		val = runtime.NewRuntimeValue(-1 * valNum)
 	} else {
 		if val.Value != true && val.Value != false {
-			val = NewRuntimeValue(false)
+			val = runtime.NewRuntimeValue(false)
 		} else {
-			val = NewRuntimeValue(!val.Value.(bool))
+			val = runtime.NewRuntimeValue(!val.Value.(bool))
 		}
 	}
 
 	return val, nil
 }
 
-func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*RuntimeValue, *RuntimeError) {
-	left, err := e.evaluteExpr(binaryExpr.Left)
+func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
+	left, err := e.EvaluateExpr(binaryExpr.Left)
 	if err != nil {
 		return nil, err
 	}
 
-	right, err := e.evaluteExpr(binaryExpr.Right)
+	right, err := e.EvaluateExpr(binaryExpr.Right)
 	if err != nil {
 		return nil, err
 	}
@@ -139,87 +162,87 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*RuntimeValue
 
 		if isLeftStr {
 			if !isRightStr {
-				return nil, NewRuntimeError("operand must be a string", binaryExpr.Operator.Literal(), binaryExpr.Line)
+				return nil, runtime.NewRuntimeError("operand must be a string", binaryExpr.Operator.Literal(), binaryExpr.Line)
 			}
 
-			return NewRuntimeValue(leftStr + rightStr), nil
+			return runtime.NewRuntimeValue(leftStr + rightStr), nil
 		} else if isLeftNum {
 			if !isRightNum {
-				return nil, NewRuntimeError("operand must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+				return nil, runtime.NewRuntimeError("operand must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 			}
 
-			return NewRuntimeValue(leftNum + rightNum), nil
+			return runtime.NewRuntimeValue(leftNum + rightNum), nil
 		} else {
-			return nil, NewRuntimeError("either both of the operands must be a string or else both of them must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("either both of the operands must be a string or else both of them must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 	case tokens.MINUS:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
-		return NewRuntimeValue(leftNum - rightNum), nil
+		return runtime.NewRuntimeValue(leftNum - rightNum), nil
 	case tokens.STAR:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
-		return NewRuntimeValue(leftNum * rightNum), nil
+		return runtime.NewRuntimeValue(leftNum * rightNum), nil
 	case tokens.SLASH:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
-		return NewRuntimeValue(leftNum / rightNum), nil
+		return runtime.NewRuntimeValue(leftNum / rightNum), nil
 	case tokens.LESS:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
-		return NewRuntimeValue(leftNum < rightNum), nil
+		return runtime.NewRuntimeValue(leftNum < rightNum), nil
 	case tokens.LESS_EQUAL:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
-		return NewRuntimeValue(leftNum <= rightNum), nil
+		return runtime.NewRuntimeValue(leftNum <= rightNum), nil
 	case tokens.GREATER:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
-		return NewRuntimeValue(leftNum > rightNum), nil
+		return runtime.NewRuntimeValue(leftNum > rightNum), nil
 	case tokens.GREATER_EQUAL:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
-		return NewRuntimeValue(leftNum >= rightNum), nil
+		return runtime.NewRuntimeValue(leftNum >= rightNum), nil
 	case tokens.EQUAL_EQUAL:
-		return NewRuntimeValue(left.Value == right.Value), nil
+		return runtime.NewRuntimeValue(left.Value == right.Value), nil
 	case tokens.BANG_EQUAL:
-		return NewRuntimeValue(left.Value != right.Value), nil
+		return runtime.NewRuntimeValue(left.Value != right.Value), nil
 	default:
-		return nil, NewRuntimeError("invalid binary expression operator", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		return nil, runtime.NewRuntimeError("invalid binary expression operator", binaryExpr.Operator.Literal(), binaryExpr.Line)
 	}
 }

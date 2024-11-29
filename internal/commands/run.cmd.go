@@ -7,11 +7,13 @@ import (
 	"github.com/0xmukesh/interpreter/internal/evaluator"
 	"github.com/0xmukesh/interpreter/internal/lexer"
 	"github.com/0xmukesh/interpreter/internal/parser"
+	"github.com/0xmukesh/interpreter/internal/runner"
+	"github.com/0xmukesh/interpreter/internal/runtime"
 	"github.com/0xmukesh/interpreter/internal/tokens"
 	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
-func EvaluteCmdHandler(src []byte) {
+func RunCmdHandler(src []byte) {
 	l := lexer.NewLexer(src)
 
 	tkns, lErr := l.LexAll()
@@ -37,24 +39,13 @@ func EvaluteCmdHandler(src []byte) {
 		utils.EPrint(fmt.Sprintf("%s\n", pErr.Error()))
 	}
 
-	e := evaluator.NewEvaluator(ast)
+	vars := map[string]runtime.RuntimeValue{}
+	env := runtime.NewEnvironment(vars)
+	e := evaluator.NewEvaluator(ast, env)
+	r := runner.NewRunner(ast, env, e)
 
-	for {
-		val, eErr := e.Evaluate()
-		if eErr != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", eErr.Error())
-		}
-
-		if val == nil {
-			break
-		} else {
-			fmt.Println(val.String())
-		}
+	for !r.IsAtEnd() {
+		r.Run()
 	}
 
-	if hasLexicalErrs == 0 {
-		os.Exit(65)
-	} else {
-		os.Exit(0)
-	}
 }

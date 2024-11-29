@@ -24,9 +24,8 @@ type BaseExpr struct {
 	Line int
 }
 
-func (e BaseExpr) GetLine() int {
-	return e.Line
-}
+func (e BaseExpr) GetLine() int     { return e.Line }
+func (e BaseExpr) isAstValue() bool { return true }
 
 type LiteralExpr struct {
 	BaseExpr
@@ -34,9 +33,7 @@ type LiteralExpr struct {
 	Value     string
 }
 
-func (e LiteralExpr) ParseExpr() string {
-	return e.Value
-}
+func (e LiteralExpr) ParseExpr() string { return e.Value }
 func NewLiteralExpr(tokenType tokens.TokenType, value string, line int) LiteralExpr {
 	return LiteralExpr{
 		TokenType: tokenType,

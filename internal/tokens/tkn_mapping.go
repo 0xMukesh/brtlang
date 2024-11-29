@@ -91,6 +91,11 @@ var ReservedKeywordsMapping = map[TokenType]string{
 	WHILE:  WHILE.String(),
 }
 
+func (t TokenType) IsReserved() bool {
+	_, ok := ReservedKeywordsMapping[t]
+	return ok
+}
+
 func (t TokenType) Literal() string {
 	return TknLiteralMapping[t]
 }
