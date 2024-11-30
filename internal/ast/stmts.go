@@ -83,18 +83,53 @@ func NewCloseBlockStmt(line int) CloseBlockStmt {
 	}
 }
 
-// if (expr) node
 type IfStmt struct {
 	BaseStmt
-	Expr Expr
-	Node AstNode
+	Expr           Expr
+	IfBranch       AstNode
+	ElseIfBranches *[]ElseIfStmt
+	ElseBranch     *ElseStmt
 }
 
 func (s IfStmt) GetExpr() Expr { return s.Expr }
-func NewIfStmt(expr Expr, node AstNode, line int) IfStmt {
+func NewIfStmt(expr Expr, ifBranch AstNode, elseIfBranches *[]ElseIfStmt, elseBranch *ElseStmt, line int) IfStmt {
 	return IfStmt{
-		Expr: expr,
-		Node: node,
+		Expr:           expr,
+		IfBranch:       ifBranch,
+		ElseIfBranches: elseIfBranches,
+		ElseBranch:     elseBranch,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+type ElseIfStmt struct {
+	BaseStmt
+	Expr   Expr
+	Branch AstNode
+}
+
+func (s ElseIfStmt) GetExpr() Expr { return s.Expr }
+func NewElseIfStmt(expr Expr, branch AstNode, line int) ElseIfStmt {
+	return ElseIfStmt{
+		Expr:   expr,
+		Branch: branch,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+type ElseStmt struct {
+	BaseStmt
+	Branch AstNode
+}
+
+func (s ElseStmt) GetExpr() Expr { return nil }
+func NewElseStmt(branch AstNode, line int) ElseStmt {
+	return ElseStmt{
+		Branch: branch,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},

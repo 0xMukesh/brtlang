@@ -1,0 +1,11 @@
+yo test = 1;
+
+hmm (test == "okay") {
+  yap("boomer ahh shit");
+} mid (test == "ok") {
+  yap("millennial ahh shit");
+} mid (test == "k") {
+  yap("your text is more drier than rajasthan");
+} nah {
+  yap("tf");
+}

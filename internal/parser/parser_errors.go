@@ -10,6 +10,7 @@ const (
 	MISSING_SEMICOLON = "missing ';'"
 	MISSING_RPAREN    = "missing ')'"
 	MISSING_RBRACE    = "missing '}'"
+	MISSING_IF_BRANCH = "missing 'if' branch"
 
 	INVALID_VARIABLE_NAME = "invalid variable name"
 	INVALID_EXPRESSION    = "invalid expression"

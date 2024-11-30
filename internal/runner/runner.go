@@ -6,6 +6,7 @@ import (
 	"github.com/0xmukesh/interpreter/internal/ast"
 	"github.com/0xmukesh/interpreter/internal/evaluator"
 	"github.com/0xmukesh/interpreter/internal/runtime"
+	"github.com/0xmukesh/interpreter/internal/tokens"
 	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
@@ -41,6 +42,27 @@ func (r *Runner) curr() ast.AstNode {
 	} else {
 		return r.Ast[len(r.Ast)-1]
 	}
+}
+
+func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
+	evaledCondition, err := r.Evaluator.EvaluateExpr(expr)
+	if err != nil {
+		utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+	}
+
+	if evaledCondition != nil {
+		conditionVal := (*evaledCondition).Value
+		if conditionVal != true && conditionVal != false {
+			utils.EPrint("expected bool expression\n")
+		}
+
+		if conditionVal == true {
+			r.RunNode(node)
+			return true
+		}
+	}
+
+	return false
 }
 
 func (r *Runner) RunNode(node ast.AstNode) {
@@ -79,19 +101,27 @@ func (r *Runner) RunNode(node ast.AstNode) {
 				env.SetVar(value.Name, *runtime.NewRuntimeValue(val.Value))
 			}
 		case ast.IfStmt:
-			evaledCondition, err := r.Evaluator.EvaluateExpr(value.Expr)
-			if err != nil {
-				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+			var res bool
+			res = r.EvalAndRunNode(value.Expr, value.IfBranch)
+
+			if !res {
+				elseIfBranches := value.ElseIfBranches
+
+				if elseIfBranches != nil {
+					for _, elseIfBranch := range *elseIfBranches {
+						res = r.EvalAndRunNode(elseIfBranch.Expr, elseIfBranch.Branch)
+						if res {
+							break
+						}
+					}
+				}
 			}
 
-			if evaledCondition != nil {
-				conditionVal := (*evaledCondition).Value
-				if conditionVal != true && conditionVal != false {
-					utils.EPrint("expected bool expression\n")
-				}
+			if !res {
+				elseBranch := value.ElseBranch
 
-				if conditionVal == true {
-					r.RunNode(value.Node)
+				if elseBranch != nil {
+					r.EvalAndRunNode(ast.NewLiteralExpr(tokens.TRUE, "", 0), elseBranch.Branch)
 				}
 			}
 		}

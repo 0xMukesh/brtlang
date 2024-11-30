@@ -21,3 +21,16 @@ rules in order of precedence (lowest to highest)
 ### flow
 
 source code -> lexer -> parser -> (runner <-> evaluator) -> output
+
+### brainrot keywords
+
+| sanity  | insanity |
+| ------- | -------- |
+| var     | yo       |
+| print   | yap      |
+| if      | hmm      |
+| else if | mid      |
+| else    | nah      |
+| true    | bet      |
+| false   | cap      |
+| nil     | nada     |

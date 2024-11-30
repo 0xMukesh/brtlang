@@ -227,6 +227,10 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return p.parseVarAssignStmt()
 	case tokens.IF:
 		return p.parseIfStmt()
+	case tokens.ELSE_IF:
+		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
+	case tokens.ELSE:
+		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
 	}
 
 	literal := p.curr().Lexeme

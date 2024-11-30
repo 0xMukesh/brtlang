@@ -34,20 +34,21 @@ const (
 	NUMBER
 	IDENTIFIER
 
+	TRUE
+	FALSE
+	NIL
+	IF
+	ELSE_IF
+	ELSE
+	VAR
+	PRINT
 	AND
 	CLASS
-	ELSE
-	FALSE
 	FOR
 	FUN
-	IF
-	NIL
-	PRINT
 	RETURN
 	SUPER
 	THIS
-	TRUE
-	VAR
 	WHILE
 )
 
@@ -74,21 +75,22 @@ var TknLiteralMapping = map[TokenType]string{
 }
 
 var ReservedKeywordsMapping = map[TokenType]string{
-	AND:    AND.String(),
-	CLASS:  CLASS.String(),
-	ELSE:   ELSE.String(),
-	FALSE:  FALSE.String(),
-	FOR:    FOR.String(),
-	FUN:    FUN.String(),
-	IF:     IF.String(),
-	NIL:    NIL.String(),
-	PRINT:  PRINT.String(),
-	RETURN: RETURN.String(),
-	SUPER:  SUPER.String(),
-	THIS:   THIS.String(),
-	TRUE:   TRUE.String(),
-	VAR:    VAR.String(),
-	WHILE:  WHILE.String(),
+	TRUE:    TRUE.String(),
+	FALSE:   FALSE.String(),
+	NIL:     NIL.String(),
+	IF:      IF.String(),
+	ELSE_IF: ELSE_IF.String(),
+	ELSE:    ELSE.String(),
+	VAR:     VAR.String(),
+	PRINT:   PRINT.String(),
+	AND:     AND.String(),
+	CLASS:   CLASS.String(),
+	FOR:     FOR.String(),
+	FUN:     FUN.String(),
+	RETURN:  RETURN.String(),
+	SUPER:   SUPER.String(),
+	THIS:    THIS.String(),
+	WHILE:   WHILE.String(),
 }
 
 func (t TokenType) IsReserved() bool {
@@ -150,34 +152,36 @@ func (t TokenType) String() string {
 		return "NUMBER"
 	case IDENTIFIER:
 		return "IDENTIFIER"
+	case VAR:
+		return "YO"
+	case PRINT:
+		return "YAP"
+	case IF:
+		return "HMM"
+	case ELSE_IF:
+		return "MID"
+	case ELSE:
+		return "NAH"
+	case TRUE:
+		return "BET"
+	case FALSE:
+		return "CAP"
+	case NIL:
+		return "NADA"
 	case AND:
 		return "AND"
 	case CLASS:
 		return "CLASS"
-	case ELSE:
-		return "ELSE"
-	case FALSE:
-		return "FALSE"
 	case FOR:
 		return "FOR"
 	case FUN:
 		return "FUN"
-	case IF:
-		return "IF"
-	case NIL:
-		return "NIL"
-	case PRINT:
-		return "PRINT"
 	case RETURN:
 		return "RETURN"
 	case SUPER:
 		return "SUPER"
 	case THIS:
 		return "THIS"
-	case TRUE:
-		return "TRUE"
-	case VAR:
-		return "VAR"
 	case WHILE:
 		return "WHILE"
 	default:

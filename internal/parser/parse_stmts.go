@@ -106,27 +106,73 @@ func (p *Parser) parseCreateBlockStmt() (*ast.AstNode, *ParserError) {
 }
 
 func (p *Parser) parseIfStmt() (*ast.AstNode, *ParserError) {
-	conditionNode, err := p.Parse()
+	ifConditionNode, err := p.Parse()
 	if err != nil {
 		return nil, err
 	}
 
-	if conditionNode == nil {
+	if ifConditionNode == nil {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	if !conditionNode.Value.IsExpr() {
+	if !ifConditionNode.Value.IsExpr() {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	nodeTbe, err := p.Parse()
+	ifBranch, err := p.Parse()
 	if err != nil {
 		return nil, err
 	}
 
-	if nodeTbe == nil {
+	if ifBranch == nil {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	return ast.NewAstNode(ast.STMT, ast.NewIfStmt(conditionNode.ExtractExpr(), *nodeTbe, p.curr().Line)), nil
+	var elseIfStmts []ast.ElseIfStmt
+	var elseStmt ast.ElseStmt
+
+	for p.peek().Type == tokens.ELSE_IF {
+		p.advance()
+
+		elseIfConditionNode, err := p.Parse()
+		if err != nil {
+			return nil, err
+		}
+
+		if elseIfConditionNode == nil {
+			return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+		}
+
+		if !elseIfConditionNode.Value.IsExpr() {
+			return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+		}
+
+		elseIfBranch, err := p.Parse()
+		if err != nil {
+			return nil, err
+		}
+
+		if elseIfBranch == nil {
+			return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+		}
+
+		elseIfStmts = append(elseIfStmts, ast.NewElseIfStmt(elseIfConditionNode.ExtractExpr(), *elseIfBranch, p.curr().Line))
+	}
+
+	if p.peek().Type == tokens.ELSE {
+		p.advance()
+
+		elseBranch, err := p.Parse()
+		if err != nil {
+			return nil, err
+		}
+
+		if elseBranch == nil {
+			return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+		}
+
+		elseStmt = ast.NewElseStmt(*elseBranch, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewIfStmt(ifConditionNode.ExtractExpr(), *ifBranch, &elseIfStmts, &elseStmt, p.curr().Line)), nil
 }

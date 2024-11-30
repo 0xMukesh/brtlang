@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"reflect"
 	"strconv"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
@@ -243,8 +244,16 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 
 		return runtime.NewRuntimeValue(leftNum >= rightNum), nil
 	case tokens.EQUAL_EQUAL:
+		if reflect.TypeOf(left.Value) != reflect.TypeOf(right.Value) {
+			return nil, runtime.NewRuntimeError("operands must be of same type", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
 		return runtime.NewRuntimeValue(left.Value == right.Value), nil
 	case tokens.BANG_EQUAL:
+		if reflect.TypeOf(left.Value) != reflect.TypeOf(right.Value) {
+			return nil, runtime.NewRuntimeError("operands must be of same type", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
 		return runtime.NewRuntimeValue(left.Value != right.Value), nil
 	default:
 		return nil, runtime.NewRuntimeError("invalid binary expression operator", binaryExpr.Operator.Literal(), binaryExpr.Line)
