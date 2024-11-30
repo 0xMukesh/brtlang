@@ -21,7 +21,7 @@ yap("hello, world");
 execute the code via the following command
 
 ```
-brtlang run test.brt
+./brtlang run test.brt
 ```
 
 ## examples
