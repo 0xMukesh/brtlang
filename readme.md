@@ -4,7 +4,7 @@ a toy programming language whose code is _brainrot_
 
 ## usage
 
-the package is not yet published to https://pkg.go.dev so if you want to try it out, you have to build from source
+the package is not yet published to https://pkg.go.dev so if you want to try it out, you have to build it from source
 
 ```
 git clone https://github.com/0xmukesh/brtlang
