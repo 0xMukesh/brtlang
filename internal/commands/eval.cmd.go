@@ -23,7 +23,7 @@ func EvaluteCmdHandler(src []byte) {
 	}
 
 	vars := map[string]runtime.RuntimeValue{}
-	globaEnv := runtime.NewEnvironment(vars, 0)
+	globaEnv := runtime.NewEnvironment(vars, nil)
 	runtime := runtime.NewRuntime(&[]runtime.Environment{*globaEnv})
 	e := evaluator.NewEvaluator(ast, runtime)
 

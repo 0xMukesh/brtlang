@@ -79,50 +79,13 @@ func (r *Runner) RunNode(node ast.AstNode) {
 			fmt.Println(val)
 		case ast.CreateBlockStmt:
 			localEnvVars := make(map[string]runtime.RuntimeValue)
-			for k, v := range r.Runtime.CurrEnv().Vars {
-				localEnvVars[k] = v
-			}
-			localEnvIdx := r.Runtime.CurrEnv().Idx + 1
-			localEnv := runtime.NewEnvironment(localEnvVars, localEnvIdx)
+			localEnv := runtime.NewEnvironment(localEnvVars, r.Runtime.CurrEnv())
 			r.Runtime.AddNewEnv(*localEnv)
 
 			for _, node := range value.Nodes {
 				r.RunNode(node)
 			}
 		case ast.CloseBlockStmt:
-			envs := r.Runtime.Envs
-			currEnv := r.Runtime.CurrEnv()
-
-			if envs != nil && currEnv != nil {
-				for currVarName, currVarVal := range currEnv.Vars {
-					occurances := []runtime.Environment{}
-
-					for _, env := range *envs {
-						for varName := range env.Vars {
-							if varName == currVarName {
-								occurances = append(occurances, env)
-							}
-						}
-					}
-
-					if len(occurances) == 1 {
-						occurances[0].SetVar(currVarName, currVarVal)
-					} else if len(occurances) > 1 {
-						var parentEnv *runtime.Environment
-
-						for _, env := range occurances {
-							if env.Idx == currEnv.Idx-1 {
-								parentEnv = &env
-							}
-						}
-
-						if parentEnv != nil {
-							parentEnv.SetVar(currVarName, currVarVal)
-						}
-					}
-				}
-			}
-
 			r.Runtime.RemoveLastEnv()
 		case ast.VarAssignStmt:
 			val, err := r.Evaluator.EvaluateExpr(value.Expr)
@@ -135,8 +98,8 @@ func (r *Runner) RunNode(node ast.AstNode) {
 				env.SetVar(value.Name, *runtime.NewRuntimeValue(val.Value))
 			}
 		case ast.VarReassignStmt:
-			env := r.Runtime.CurrEnv()
-			val := env.GetVar(value.Name)
+			currEnv := r.Runtime.CurrEnv()
+			val, env := currEnv.GetVar(value.Name)
 
 			if val == nil {
 				utils.EPrint("undefined identifier\n")

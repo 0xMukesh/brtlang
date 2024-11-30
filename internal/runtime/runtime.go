@@ -20,23 +20,27 @@ func (e RuntimeValue) String() string {
 }
 
 type Environment struct {
-	Idx  int
-	Vars RuntimeVarMapping
+	Parent *Environment
+	Vars   RuntimeVarMapping
 }
 
-func NewEnvironment(vars RuntimeVarMapping, idx int) *Environment {
+func NewEnvironment(vars RuntimeVarMapping, parent *Environment) *Environment {
 	return &Environment{
-		Idx:  idx,
-		Vars: vars,
+		Parent: parent,
+		Vars:   vars,
 	}
 }
-func (e *Environment) GetVar(name string) *RuntimeValue {
+func (e *Environment) GetVar(name string) (*RuntimeValue, *Environment) {
 	val, ok := e.Vars[name]
 	if !ok {
-		return nil
+		if e.Parent == nil {
+			return nil, nil
+		}
+
+		return e.Parent.GetVar(name)
 	}
 
-	return &val
+	return &val, e
 }
 func (e *Environment) SetVar(name string, value RuntimeValue) {
 	e.Vars[name] = value

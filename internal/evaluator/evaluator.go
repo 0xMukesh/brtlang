@@ -103,10 +103,8 @@ func (e *Evaluator) evaluteLiteralExpr(literalExpr ast.LiteralExpr) (*runtime.Ru
 	case tokens.NIL:
 		return runtime.NewRuntimeValue(nil), nil
 	case tokens.IDENTIFIER:
-		env := e.Runtime.CurrEnv()
-
-		var val *runtime.RuntimeValue
-		val = env.GetVar(literalExpr.Value)
+		currEnv := e.Runtime.CurrEnv()
+		val, _ := currEnv.GetVar(literalExpr.Value)
 
 		if val != nil {
 			return runtime.NewRuntimeValue(val.Value), nil
