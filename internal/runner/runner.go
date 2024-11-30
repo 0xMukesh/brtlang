@@ -47,19 +47,15 @@ func (r *Runner) RunNode(node ast.AstNode) {
 	expr, isExpr := node.Value.(ast.Expr)
 
 	if !isExpr {
-		printStmt, isPrintStmt := node.Value.(ast.PrintStmt)
-		varAssignStmt, isVarAssignStmt := node.Value.(ast.VarAssignStmt)
-		createBlockStmt, isCreateBlockStmt := node.Value.(ast.CreateBlockStmt)
-		_, isCloseBlockStmt := node.Value.(ast.CloseBlockStmt)
-
-		if isPrintStmt {
-			val, err := r.Evaluator.EvaluateExpr(printStmt.GetExpr())
+		switch value := node.Value.(type) {
+		case ast.PrintStmt:
+			val, err := r.Evaluator.EvaluateExpr(value.GetExpr())
 			if err != nil {
 				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
 			}
 
 			fmt.Println(val)
-		} else if isCreateBlockStmt {
+		case ast.CreateBlockStmt:
 			localEnvVars := make(map[string]runtime.RuntimeValue)
 			for k, v := range r.Runtime.CurrEnv().Vars {
 				localEnvVars[k] = v
@@ -67,20 +63,36 @@ func (r *Runner) RunNode(node ast.AstNode) {
 			localEnv := runtime.NewEnvironment(localEnvVars)
 			r.Runtime.AddNewEnv(*localEnv)
 
-			for _, node := range createBlockStmt.Nodes {
+			for _, node := range value.Nodes {
 				r.RunNode(node)
 			}
-		} else if isCloseBlockStmt {
+		case ast.CloseBlockStmt:
 			r.Runtime.RemoveLastEnv()
-		} else if isVarAssignStmt {
-			val, err := r.Evaluator.EvaluateExpr(varAssignStmt.Expr)
+		case ast.VarAssignStmt:
+			val, err := r.Evaluator.EvaluateExpr(value.Expr)
 			if err != nil {
 				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
 			}
 
 			if val != nil {
 				env := r.Runtime.CurrEnv()
-				env.SetVar(varAssignStmt.Name, *runtime.NewRuntimeValue(val.Value))
+				env.SetVar(value.Name, *runtime.NewRuntimeValue(val.Value))
+			}
+		case ast.IfStmt:
+			evaledCondition, err := r.Evaluator.EvaluateExpr(value.Expr)
+			if err != nil {
+				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+			}
+
+			if evaledCondition != nil {
+				conditionVal := (*evaledCondition).Value
+				if conditionVal != true && conditionVal != false {
+					utils.EPrint("expected bool expression\n")
+				}
+
+				if conditionVal == true {
+					r.RunNode(value.Node)
+				}
 			}
 		}
 	} else {

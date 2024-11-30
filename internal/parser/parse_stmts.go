@@ -104,3 +104,29 @@ func (p *Parser) parseCreateBlockStmt() (*ast.AstNode, *ParserError) {
 
 	return ast.NewAstNode(ast.STMT, ast.NewCreateBlockStmt(nodes, p.curr().Line)), nil
 }
+
+func (p *Parser) parseIfStmt() (*ast.AstNode, *ParserError) {
+	conditionNode, err := p.Parse()
+	if err != nil {
+		return nil, err
+	}
+
+	if conditionNode == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if !conditionNode.Value.IsExpr() {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	nodeTbe, err := p.Parse()
+	if err != nil {
+		return nil, err
+	}
+
+	if nodeTbe == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewIfStmt(conditionNode.ExtractExpr(), *nodeTbe, p.curr().Line)), nil
+}

@@ -225,6 +225,8 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return p.parsePrintStmt()
 	case tokens.VAR:
 		return p.parseVarAssignStmt()
+	case tokens.IF:
+		return p.parseIfStmt()
 	}
 
 	literal := p.curr().Lexeme

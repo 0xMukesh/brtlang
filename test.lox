@@ -1,9 +1,14 @@
-{
-  var hello = "outer hello";
-  {
-    var hello = "inner hello";
-    print hello;
-  }
-  print hello;
+var nitw = "nitw";
+var is = "is";
+var a = "a";
+var college = "college";
+var institute = "institute";
+
+var collegeStmt = nitw+is+a+college;
+var instituteStmt = nitw+is+a+institute;
+var studentStmt = collegeStmt;
+var deanStmt = instituteStmt;
+
+if (studentStmt != deanStmt) {
+    print("nuh uh, you're kicked");
 }
-print hello;

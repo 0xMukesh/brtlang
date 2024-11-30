@@ -19,6 +19,8 @@ type BaseStmt struct {
 
 func (s BaseStmt) ParseStmt()       {}
 func (s BaseStmt) GetLine() int     { return s.Line }
+func (s BaseStmt) IsExpr() bool     { return false }
+func (s BaseStmt) IsStmt() bool     { return true }
 func (s BaseStmt) isAstValue() bool { return true }
 
 type VarAssignStmt struct {
@@ -75,6 +77,24 @@ type CloseBlockStmt struct {
 func (s CloseBlockStmt) GetExpr() Expr { return nil }
 func NewCloseBlockStmt(line int) CloseBlockStmt {
 	return CloseBlockStmt{
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+// if (expr) node
+type IfStmt struct {
+	BaseStmt
+	Expr Expr
+	Node AstNode
+}
+
+func (s IfStmt) GetExpr() Expr { return s.Expr }
+func NewIfStmt(expr Expr, node AstNode, line int) IfStmt {
+	return IfStmt{
+		Expr: expr,
+		Node: node,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},

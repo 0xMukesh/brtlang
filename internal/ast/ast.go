@@ -8,6 +8,8 @@ const (
 )
 
 type AstNodeValue interface {
+	IsExpr() bool
+	IsStmt() bool
 	isAstValue() bool
 }
 

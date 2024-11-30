@@ -25,6 +25,8 @@ type BaseExpr struct {
 }
 
 func (e BaseExpr) GetLine() int     { return e.Line }
+func (e BaseExpr) IsExpr() bool     { return true }
+func (e BaseExpr) IsStmt() bool     { return false }
 func (e BaseExpr) isAstValue() bool { return true }
 
 type LiteralExpr struct {

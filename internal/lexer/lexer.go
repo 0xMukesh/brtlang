@@ -77,32 +77,25 @@ func (l *Lexer) Lex() (*tokens.Token, *LexerError) {
 		tknType, doesExists := utils.HasValueMap(tokens.TknLiteralMapping, string(l.Char))
 
 		if doesExists {
-			if *tknType == tokens.EQUAL {
-				tkn, err := l.LexEqualChar()
-				return tkn, err
+			var tkn *tokens.Token
+			var err *LexerError
+
+			switch *tknType {
+			case tokens.EQUAL:
+				tkn, err = l.LexEqualChar()
+			case tokens.BANG:
+				tkn, err = l.LexBangChar()
+			case tokens.LESS:
+				tkn, err = l.LexLessChar()
+			case tokens.GREATER:
+				tkn, err = l.LexGreaterChar()
+			case tokens.SLASH:
+				tkn, err = l.LexSlashChar()
+			default:
+				tkn = tokens.NewToken(*tknType, string(l.Char), "null", l.Line)
 			}
 
-			if *tknType == tokens.BANG {
-				tkn, err := l.LexBangChar()
-				return tkn, err
-			}
-
-			if *tknType == tokens.LESS {
-				tkn, err := l.LexLessChar()
-				return tkn, err
-			}
-
-			if *tknType == tokens.GREATER {
-				tkn, err := l.LexGreaterChar()
-				return tkn, err
-			}
-
-			if *tknType == tokens.SLASH {
-				tkn, err := l.LexSlashChar()
-				return tkn, err
-			}
-
-			return tokens.NewToken(*tknType, string(l.Char), "null", l.Line), nil
+			return tkn, err
 		} else {
 			if l.Char == '"' {
 				tkn, err := l.LexStrLiterals()
