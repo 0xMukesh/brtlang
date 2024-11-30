@@ -1,0 +1,8 @@
+yo msg = "hi";
+{
+  yo msg = "bye";
+  yap(msg); // bye
+  msg = "byeee";
+  yap(msg); // byeee
+}
+yap(msg); // hi

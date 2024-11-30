@@ -1,0 +1,6 @@
+// define a varible via `yo` keyword
+yo msg = "sup";
+yap(msg); // sup
+
+msg = "wsg";
+yap(msg); // wsg

@@ -1,0 +1,13 @@
+yo lim = 10;
+yo fm = 0;
+yo fn = 1;
+yo idx = 0;
+
+vibin (idx < lim) {
+  yap(fm);
+
+  yo temp = fm;
+  fm = fn;
+  fn = temp + fm;
+  idx = idx + 1;
+}

@@ -4,7 +4,7 @@ yo fn = 1;
 yo index = 0;
 
 vibin (index < limit) {
-  yap fm;
+  yap(fm);
   yo temp = fm;
   fm = fn;
   fn = temp + fn;

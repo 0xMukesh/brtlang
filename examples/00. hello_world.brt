@@ -1,0 +1,2 @@
+// print out a message via `yap` keyword
+yap("hello, world");

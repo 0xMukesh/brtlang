@@ -1,0 +1,11 @@
+yo age = 17;
+yo isAdult = age >= 18;
+
+// `hmm` is equivalent to if
+// `mid` is equivalent to else if
+// `nah` is equivalent to else
+hmm(isAdult) {
+  yap("is an adult");
+} nah {
+  yap("isn't an adult");
+}
