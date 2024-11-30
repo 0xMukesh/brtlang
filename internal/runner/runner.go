@@ -140,6 +140,27 @@ func (r *Runner) RunNode(node ast.AstNode) {
 					r.EvalAndRunNode(ast.NewLiteralExpr(tokens.TRUE, "", 0), elseBranch.Branch)
 				}
 			}
+		case ast.WhileStmt:
+			for {
+				val, err := r.Evaluator.EvaluateExpr(value.Expr)
+				if err != nil {
+					utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+				}
+
+				if val != nil {
+					conditionVal, isConditionBool := val.Value.(bool)
+
+					if !isConditionBool {
+						runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("bool"), value.Expr.ParseExpr(), value.Expr.GetLine())
+					}
+
+					if !conditionVal {
+						break
+					}
+
+					r.RunNode(value.Node)
+				}
+			}
 		}
 	} else {
 		_, err := r.Evaluator.EvaluateExpr(expr)

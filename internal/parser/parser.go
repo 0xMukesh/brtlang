@@ -287,6 +287,8 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
 	case tokens.ELSE:
 		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
+	case tokens.WHILE:
+		return p.parseWhileStmt()
 	case tokens.IDENTIFIER:
 		if (p.prev().Type == tokens.SEMICOLON) || (p.prev().Type == tokens.LEFT_BRACE) {
 			switch p.peek().Type {

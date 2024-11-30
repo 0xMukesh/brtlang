@@ -59,8 +59,8 @@ const (
 	OR
 
 	// 34
-	FOR
 	WHILE
+	FOR
 
 	// 36
 	CLASS
@@ -103,8 +103,8 @@ var ReservedKeywordsMapping = map[TokenType]string{
 	PRINT:   PRINT.String(),
 	AND:     AND.String(),
 	OR:      OR.String(),
-	FOR:     FOR.String(),
 	WHILE:   WHILE.String(),
+	FOR:     FOR.String(),
 	CLASS:   CLASS.String(),
 	FUN:     FUN.String(),
 	RETURN:  RETURN.String(),
@@ -191,10 +191,10 @@ func (t TokenType) String() string {
 		return "N"
 	case OR:
 		return "EHH"
-	case FOR:
-		return "FOR"
 	case WHILE:
-		return "WHILE"
+		return "VIBIN"
+	case FOR:
+		return "CHILLIN"
 	case CLASS:
 		return "CLASS"
 	case FUN:

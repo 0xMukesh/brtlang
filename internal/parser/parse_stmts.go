@@ -198,3 +198,17 @@ func (p *Parser) parseVarReassignStmt() (*ast.AstNode, *ParserError) {
 
 	return ast.NewAstNode(ast.STMT, ast.NewVarReassignStmt(varName, varValueExpr, p.curr().Line)), nil
 }
+
+func (p *Parser) parseWhileStmt() (*ast.AstNode, *ParserError) {
+	expr, err := p.Parse()
+	if err != nil || expr == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	node, err := p.Parse()
+	if err != nil || node == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewWhileStmt(expr.ExtractExpr(), *node, p.curr().Line)), nil
+}

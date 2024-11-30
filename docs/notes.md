@@ -37,3 +37,5 @@ source code -> lexer -> parser -> (runner <-> evaluator) -> output
 | nil     | nada     |
 | and     | n        |
 | or      | ehh      |
+| while   | vibin    |
+| for     | chillin  |

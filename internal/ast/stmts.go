@@ -152,3 +152,20 @@ func NewElseStmt(branch AstNode, line int) ElseStmt {
 		},
 	}
 }
+
+type WhileStmt struct {
+	BaseStmt
+	Expr Expr
+	Node AstNode
+}
+
+func (s WhileStmt) GetExpr() Expr { return s.Expr }
+func NewWhileStmt(expr Expr, node AstNode, line int) WhileStmt {
+	return WhileStmt{
+		Expr: expr,
+		Node: node,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
