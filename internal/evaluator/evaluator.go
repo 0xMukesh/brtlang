@@ -110,7 +110,7 @@ func (e *Evaluator) evaluteLiteralExpr(literalExpr ast.LiteralExpr) (*runtime.Ru
 			return runtime.NewRuntimeValue(val.Value), nil
 		}
 
-		return nil, runtime.NewRuntimeError("undefined indentifier", literalExpr.Value, literalExpr.Line)
+		return nil, runtime.NewRuntimeError(runtime.UNDEFINED_IDENTIFIER, literalExpr.Value, literalExpr.Line)
 	default:
 		return nil, nil
 	}
@@ -129,7 +129,7 @@ func (e *Evaluator) evaluteUnaryExpr(unaryExpr ast.UnaryExpr) (*runtime.RuntimeV
 	if unaryExpr.Operator == tokens.MINUS {
 		valNum, isNum := val.Value.(float64)
 		if !isNum {
-			return nil, runtime.NewRuntimeError("operand must be a number", unaryExpr.Operator.Literal(), unaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), unaryExpr.Operator.Literal(), unaryExpr.Line)
 		}
 		val = runtime.NewRuntimeValue(-1 * valNum)
 	} else {
@@ -165,25 +165,25 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 
 		if isLeftStr {
 			if !isRightStr {
-				return nil, runtime.NewRuntimeError("operand must be a string", binaryExpr.Operator.Literal(), binaryExpr.Line)
+				return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("string"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 			}
 
 			return runtime.NewRuntimeValue(leftStr + rightStr), nil
 		} else if isLeftNum {
 			if !isRightNum {
-				return nil, runtime.NewRuntimeError("operand must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+				return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 			}
 
 			return runtime.NewRuntimeValue(leftNum + rightNum), nil
 		} else {
-			return nil, runtime.NewRuntimeError("either both of the operands must be a string or else both of them must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("string", "number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 	case tokens.MINUS:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(leftNum - rightNum), nil
@@ -192,7 +192,7 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(leftNum * rightNum), nil
@@ -201,7 +201,7 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(leftNum / rightNum), nil
@@ -210,7 +210,7 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(leftNum < rightNum), nil
@@ -219,7 +219,7 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(leftNum <= rightNum), nil
@@ -228,7 +228,7 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(leftNum > rightNum), nil
@@ -237,23 +237,23 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 		rightNum, isRightNum := right.Value.(float64)
 
 		if !(isLeftNum && isRightNum) {
-			return nil, runtime.NewRuntimeError("operands must be a number", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(leftNum >= rightNum), nil
 	case tokens.EQUAL_EQUAL:
 		if reflect.TypeOf(left.Value) != reflect.TypeOf(right.Value) {
-			return nil, runtime.NewRuntimeError("operands must be of same type", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("same"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(left.Value == right.Value), nil
 	case tokens.BANG_EQUAL:
 		if reflect.TypeOf(left.Value) != reflect.TypeOf(right.Value) {
-			return nil, runtime.NewRuntimeError("operands must be of same type", binaryExpr.Operator.Literal(), binaryExpr.Line)
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("same"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(left.Value != right.Value), nil
 	default:
-		return nil, runtime.NewRuntimeError("invalid binary expression operator", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		return nil, runtime.NewRuntimeError(runtime.INVALID_OPERATOR, binaryExpr.Operator.Literal(), binaryExpr.Line)
 	}
 }

@@ -47,13 +47,15 @@ func (r *Runner) curr() ast.AstNode {
 func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
 	evaledCondition, err := r.Evaluator.EvaluateExpr(expr)
 	if err != nil {
-		utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+		err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("boolean"), evaledCondition.String(), expr.GetLine())
+		utils.EPrint(err.Error())
 	}
 
 	if evaledCondition != nil {
 		conditionVal := (*evaledCondition).Value
 		if conditionVal != true && conditionVal != false {
-			utils.EPrint("expected bool expression\n")
+			err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("boolean"), evaledCondition.String(), expr.GetLine())
+			utils.EPrint(err.Error())
 		}
 
 		if conditionVal == true {
@@ -102,7 +104,8 @@ func (r *Runner) RunNode(node ast.AstNode) {
 			val, env := currEnv.GetVar(value.Name)
 
 			if val == nil {
-				utils.EPrint("undefined identifier\n")
+				err := runtime.NewRuntimeError(runtime.UNDEFINED_IDENTIFIER, value.Name, expr.GetLine())
+				utils.EPrint(err.Error())
 			}
 
 			exprVal, err := r.Evaluator.EvaluateExpr(value.Expr)

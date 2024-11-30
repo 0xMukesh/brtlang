@@ -22,10 +22,16 @@ func NewParser(tokens []tokens.Token) *Parser {
 }
 
 func (p *Parser) curr() tokens.Token {
+	if p.Idx-1 < 0 {
+		return *tokens.NewToken(tokens.IGNORE, "", "", 1)
+	}
 	return p.Tokens[p.Idx-1]
 }
 
 func (p *Parser) prev() tokens.Token {
+	if p.Idx-2 < 0 {
+		return p.curr()
+	}
 	return p.Tokens[p.Idx-2]
 }
 
@@ -84,7 +90,7 @@ func (p *Parser) consume(expected tokens.TokenType, err ParserError) {
 func (p *Parser) extractExpr(node ast.AstNode) (ast.Expr, *ParserError) {
 	expr := node.ExtractExpr()
 	if expr == nil {
-		return nil, NewParserError("expected expression", p.curr().Lexeme, p.curr().Line)
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
 	return expr, nil
@@ -129,7 +135,7 @@ func (p *Parser) binaryRuleBuilder(selfRule func() (*ast.AstNode, *ParserError),
 
 		if p.matchAndAdvance(expectedTokens...) {
 			if !p.isSameLine() {
-				return nil, NewParserError("expected expression", p.curr().Lexeme, p.curr().Line)
+				return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 			}
 
 			p.advance()
@@ -140,7 +146,7 @@ func (p *Parser) binaryRuleBuilder(selfRule func() (*ast.AstNode, *ParserError),
 			}
 
 			if rightNode == nil {
-				return nil, NewParserError("expected expression", p.curr().Lexeme, p.curr().Line)
+				return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 			} else {
 				leftExpr, err := p.extractExpr(*leftNode)
 				if err != nil {
@@ -153,7 +159,7 @@ func (p *Parser) binaryRuleBuilder(selfRule func() (*ast.AstNode, *ParserError),
 				}
 
 				if rightExpr.ParseExpr() == "null" {
-					return nil, NewParserError("expected expression", p.curr().Lexeme, p.curr().Line)
+					return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 				}
 
 				leftNode = ast.NewAstNode(ast.EXPR, ast.NewBinaryExpr(leftExpr, token.Type, rightExpr, p.curr().Line))
@@ -207,7 +213,7 @@ func (p *Parser) unaryRule() (*ast.AstNode, *ParserError) {
 			return ast.NewAstNode(ast.EXPR, ast.NewUnaryExpr(operator.Type, expr, p.curr().Line)), nil
 		}
 
-		return nil, NewParserError("expected expression", p.curr().Lexeme, p.curr().Line)
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
 	return p.primaryRule()

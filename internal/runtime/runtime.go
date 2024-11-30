@@ -71,20 +71,3 @@ func (r *Runtime) CurrEnv() *Environment {
 	}
 	return nil
 }
-
-type RuntimeError struct {
-	Message string
-	At      string
-	Line    int
-}
-
-func NewRuntimeError(msg string, at string, line int) *RuntimeError {
-	return &RuntimeError{
-		Message: msg,
-		At:      at,
-		Line:    line,
-	}
-}
-func (e RuntimeError) Error() string {
-	return fmt.Sprintf("[line %d] Error at '%s': %s", e.Line, e.At, e.Message)
-}
