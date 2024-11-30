@@ -53,14 +53,21 @@ const (
 	// 30
 	VAR
 	PRINT
+
+	// 32
 	AND
-	CLASS
+	OR
+
+	// 34
 	FOR
+	WHILE
+
+	// 36
+	CLASS
 	FUN
 	RETURN
 	SUPER
 	THIS
-	WHILE
 )
 
 var TknLiteralMapping = map[TokenType]string{
@@ -95,13 +102,14 @@ var ReservedKeywordsMapping = map[TokenType]string{
 	VAR:     VAR.String(),
 	PRINT:   PRINT.String(),
 	AND:     AND.String(),
-	CLASS:   CLASS.String(),
+	OR:      OR.String(),
 	FOR:     FOR.String(),
+	WHILE:   WHILE.String(),
+	CLASS:   CLASS.String(),
 	FUN:     FUN.String(),
 	RETURN:  RETURN.String(),
 	SUPER:   SUPER.String(),
 	THIS:    THIS.String(),
-	WHILE:   WHILE.String(),
 }
 
 func (t TokenType) IsReserved() bool {
@@ -180,11 +188,15 @@ func (t TokenType) String() string {
 	case NIL:
 		return "NADA"
 	case AND:
-		return "AND"
-	case CLASS:
-		return "CLASS"
+		return "N"
+	case OR:
+		return "EHH"
 	case FOR:
 		return "FOR"
+	case WHILE:
+		return "WHILE"
+	case CLASS:
+		return "CLASS"
 	case FUN:
 		return "FUN"
 	case RETURN:
@@ -193,8 +205,6 @@ func (t TokenType) String() string {
 		return "SUPER"
 	case THIS:
 		return "THIS"
-	case WHILE:
-		return "WHILE"
 	default:
 		return "ILLEGAL"
 	}

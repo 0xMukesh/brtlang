@@ -216,7 +216,53 @@ func (p *Parser) unaryRule() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	return p.primaryRule()
+	return p.logicalRule()
+}
+
+func (p *Parser) logicalRule() (*ast.AstNode, *ParserError) {
+	leftNode, err := p.primaryRule()
+	if err != nil {
+		return nil, err
+	}
+
+	if leftNode != nil {
+		token := p.peek()
+
+		if p.matchAndAdvance(tokens.AND, tokens.OR) {
+			if !p.isSameLine() {
+				return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+			}
+
+			p.advance()
+
+			rightNode, err := p.logicalRule()
+			if err != nil {
+				return nil, err
+			}
+
+			if rightNode == nil {
+				return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+			} else {
+				leftExpr, err := p.extractExpr(*leftNode)
+				if err != nil {
+					return nil, err
+				}
+
+				rightExpr, err := p.extractExpr(*rightNode)
+				if err != nil {
+					return nil, err
+				}
+
+				if rightExpr.ParseExpr() == "null" {
+					return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+				}
+
+				leftNode = ast.NewAstNode(ast.EXPR, ast.NewLogicalExpr(leftExpr, token.Type, rightExpr, p.curr().Line))
+			}
+		}
+	}
+
+	return leftNode, nil
 }
 
 func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {

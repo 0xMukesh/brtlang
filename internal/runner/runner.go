@@ -47,7 +47,7 @@ func (r *Runner) curr() ast.AstNode {
 func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
 	evaledCondition, err := r.Evaluator.EvaluateExpr(expr)
 	if err != nil {
-		err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("boolean"), evaledCondition.String(), expr.GetLine())
+		err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("boolean"), "smth", expr.GetLine())
 		utils.EPrint(err.Error())
 	}
 

@@ -13,6 +13,7 @@ const (
 	GROUPING
 	UNARY
 	BINARY
+	LOGICAL
 )
 
 type Expr interface {
@@ -94,6 +95,27 @@ func (e BinaryExpr) ParseExpr() string {
 }
 func NewBinaryExpr(left Expr, operator tokens.TokenType, right Expr, line int) BinaryExpr {
 	return BinaryExpr{
+		Left:     left,
+		Operator: operator,
+		Right:    right,
+		BaseExpr: BaseExpr{
+			Line: line,
+		},
+	}
+}
+
+type LogicalExpr struct {
+	BaseExpr
+	Left     Expr
+	Operator tokens.TokenType
+	Right    Expr
+}
+
+func (e LogicalExpr) ParseExpr() string {
+	return fmt.Sprintf("(%s %s %s)", e.Operator.Literal(), e.Left.ParseExpr(), e.Right.ParseExpr())
+}
+func NewLogicalExpr(left Expr, operator tokens.TokenType, right Expr, line int) LogicalExpr {
+	return LogicalExpr{
 		Left:     left,
 		Operator: operator,
 		Right:    right,

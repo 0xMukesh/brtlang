@@ -1,1 +1,14 @@
-wtf = "ll";
+yo age = 25;
+yo res;
+
+hmm (age < 13) {
+  res = "kidoo";
+} mid ((age >= 13) n (age < 20)) {
+  res = "teen";
+} mid ((age >= 20) n (age < 60)) {
+  res = "unkil";
+} nah {
+  res = "saar";
+}
+
+yap(res);

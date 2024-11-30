@@ -76,6 +76,8 @@ func (e *Evaluator) EvaluateExpr(expr ast.Expr) (*runtime.RuntimeValue, *runtime
 		return e.evaluteLiteralExpr(v)
 	case ast.GroupingExpr:
 		return e.evaluteGroupingExpr(v)
+	case ast.LogicalExpr:
+		return e.evaluteLogicalExpr(v)
 	case ast.UnaryExpr:
 		return e.evaluteUnaryExpr(v)
 	case ast.BinaryExpr:
@@ -118,6 +120,43 @@ func (e *Evaluator) evaluteLiteralExpr(literalExpr ast.LiteralExpr) (*runtime.Ru
 
 func (e *Evaluator) evaluteGroupingExpr(groupingExpr ast.GroupingExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
 	return e.EvaluateExpr(groupingExpr.Expr)
+}
+
+func (e *Evaluator) evaluteLogicalExpr(logicalExpr ast.LogicalExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
+	left, err := e.EvaluateExpr(logicalExpr.Left)
+	if err != nil {
+		return nil, err
+	}
+
+	right, err := e.EvaluateExpr(logicalExpr.Right)
+	if err != nil {
+		return nil, err
+	}
+
+	operator := logicalExpr.Operator
+
+	switch operator {
+	case tokens.AND:
+		leftBool, isLeftBool := left.Value.(bool)
+		rightBool, isRightBool := right.Value.(bool)
+
+		if !(isLeftBool && isRightBool) {
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("bool"), logicalExpr.Operator.Literal(), logicalExpr.Line)
+		}
+
+		return runtime.NewRuntimeValue(leftBool && rightBool), nil
+	case tokens.OR:
+		leftBool, isLeftBool := left.Value.(bool)
+		rightBool, isRightBool := right.Value.(bool)
+
+		if !(isLeftBool && isRightBool) {
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("bool"), logicalExpr.Operator.Literal(), logicalExpr.Line)
+		}
+
+		return runtime.NewRuntimeValue(leftBool || rightBool), nil
+	default:
+		return nil, runtime.NewRuntimeError(runtime.INVALID_OPERATOR, logicalExpr.Operator.Literal(), logicalExpr.Line)
+	}
 }
 
 func (e *Evaluator) evaluteUnaryExpr(unaryExpr ast.UnaryExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
