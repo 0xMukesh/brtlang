@@ -3,24 +3,29 @@ package tokens
 type TokenType int
 
 const (
+	// 0
 	EOF TokenType = iota
 	ILLEGAL
 	IGNORE // placeholder type for tokens which can be ignored
 
+	// 3
 	LEFT_PAREN
 	RIGHT_PAREN
 	LEFT_BRACE
 	RIGHT_BRACE
 
+	// 7
 	COMMA
 	SEMICOLON
 
+	// 9
 	PLUS
 	MINUS
 	DOT
 	STAR
 	SLASH
 
+	// 14
 	EQUAL
 	EQUAL_EQUAL
 	BANG
@@ -30,16 +35,22 @@ const (
 	GREATER
 	GREATER_EQUAL
 
+	// 22
 	STRING
 	NUMBER
 	IDENTIFIER
 
+	// 24
 	TRUE
 	FALSE
 	NIL
+
+	// 27
 	IF
 	ELSE_IF
 	ELSE
+
+	// 30
 	VAR
 	PRINT
 	AND

@@ -25,6 +25,10 @@ func (p *Parser) curr() tokens.Token {
 	return p.Tokens[p.Idx-1]
 }
 
+func (p *Parser) prev() tokens.Token {
+	return p.Tokens[p.Idx-2]
+}
+
 func (p *Parser) peek() tokens.Token {
 	if !p.isAtEnd() {
 		return p.Tokens[p.Idx]
@@ -231,6 +235,13 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
 	case tokens.ELSE:
 		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
+	case tokens.IDENTIFIER:
+		if (p.prev().Type == tokens.SEMICOLON) || (p.prev().Type == tokens.LEFT_BRACE) {
+			switch p.peek().Type {
+			case tokens.EQUAL:
+				return p.parseVarReassignStmt()
+			}
+		}
 	}
 
 	literal := p.curr().Lexeme

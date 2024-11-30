@@ -40,6 +40,23 @@ func NewVarAssignStmt(name string, expr Expr, line int) VarAssignStmt {
 	}
 }
 
+type VarReassignStmt struct {
+	BaseStmt
+	Expr Expr
+	Name string
+}
+
+func (s VarReassignStmt) GetExpr() Expr { return s.Expr }
+func NewVarReassignStmt(name string, expr Expr, line int) VarReassignStmt {
+	return VarReassignStmt{
+		Name: name,
+		Expr: expr,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
 type PrintStmt struct {
 	BaseStmt
 	Expr Expr

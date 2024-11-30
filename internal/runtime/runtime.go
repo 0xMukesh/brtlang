@@ -20,11 +20,13 @@ func (e RuntimeValue) String() string {
 }
 
 type Environment struct {
+	Idx  int
 	Vars RuntimeVarMapping
 }
 
-func NewEnvironment(vars RuntimeVarMapping) *Environment {
+func NewEnvironment(vars RuntimeVarMapping, idx int) *Environment {
 	return &Environment{
+		Idx:  idx,
 		Vars: vars,
 	}
 }

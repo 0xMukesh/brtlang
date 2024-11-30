@@ -63,7 +63,7 @@ func (p *Parser) parseVarAssignStmt() (*ast.AstNode, *ParserError) {
 		varValueExpr = varValueNode.ExtractExpr()
 
 		if varValueExpr == nil {
-			return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+			return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 		}
 	} else {
 		varValueExpr = ast.NewLiteralExpr(tokens.NIL, "", p.curr().Line)
@@ -175,4 +175,26 @@ func (p *Parser) parseIfStmt() (*ast.AstNode, *ParserError) {
 	}
 
 	return ast.NewAstNode(ast.STMT, ast.NewIfStmt(ifConditionNode.ExtractExpr(), *ifBranch, &elseIfStmts, &elseStmt, p.curr().Line)), nil
+}
+
+func (p *Parser) parseVarReassignStmt() (*ast.AstNode, *ParserError) {
+	varName := p.curr().Lexeme
+	// checking whether next token is "=" or not is handled within the switch-case statement
+	p.advance()
+
+	varValueNode, err := p.Parse()
+	if err != nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if varValueNode == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	varValueExpr := varValueNode.ExtractExpr()
+	if varValueExpr == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewVarReassignStmt(varName, varValueExpr, p.curr().Line)), nil
 }
