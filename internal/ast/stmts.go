@@ -169,3 +169,35 @@ func NewWhileStmt(expr Expr, node AstNode, line int) WhileStmt {
 		},
 	}
 }
+
+type FuncDeclarationStmt struct {
+	BaseStmt
+	Name string
+	Node AstNode
+}
+
+func (s FuncDeclarationStmt) GetExpr() Expr { return nil }
+func NewFuncDeclarationStmt(name string, node AstNode, line int) FuncDeclarationStmt {
+	return FuncDeclarationStmt{
+		Name: name,
+		Node: node,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+type FuncCallStmt struct {
+	BaseStmt
+	Name string
+}
+
+func (s FuncCallStmt) GetExpr() Expr { return nil }
+func NewFuncCallStmt(name string, line int) FuncCallStmt {
+	return FuncCallStmt{
+		Name: name,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}

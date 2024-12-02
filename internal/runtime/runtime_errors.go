@@ -12,7 +12,8 @@ type RuntimeError struct {
 }
 
 const (
-	UNDEFINED_IDENTIFIER = "undefined identifier"
+	UNDEFINED_IDENTIFIER      = "undefined identifier"
+	IDENTIFIER_ALREADY_EXISTS = "identifier already exists"
 
 	INVALID_OPERAND  = "invalid operand"
 	INVALID_OPERATOR = "invalid operator"

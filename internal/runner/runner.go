@@ -80,8 +80,9 @@ func (r *Runner) RunNode(node ast.AstNode) {
 
 			fmt.Println(val)
 		case ast.CreateBlockStmt:
-			localEnvVars := make(map[string]runtime.RuntimeValue)
-			localEnv := runtime.NewEnvironment(localEnvVars, r.Runtime.CurrEnv())
+			localEnvVars := make(runtime.RuntimeVarMapping)
+			localEnvFuncs := make(runtime.RuntimeFuncMapping)
+			localEnv := runtime.NewEnvironment(localEnvVars, localEnvFuncs, r.Runtime.CurrEnv())
 			r.Runtime.AddNewEnv(*localEnv)
 
 			for _, node := range value.Nodes {
@@ -96,8 +97,14 @@ func (r *Runner) RunNode(node ast.AstNode) {
 			}
 
 			if val != nil {
-				env := r.Runtime.CurrEnv()
-				env.SetVar(value.Name, *runtime.NewRuntimeValue(val.Value))
+				currEnv := r.Runtime.CurrEnv()
+				varVal, _ := currEnv.GetVar(value.Name)
+				if varVal != nil {
+					err := runtime.NewRuntimeError(runtime.IDENTIFIER_ALREADY_EXISTS, value.Name, value.Line)
+					utils.EPrint(err.Error())
+				}
+
+				currEnv.SetVar(value.Name, *runtime.NewRuntimeValue(val.Value))
 			}
 		case ast.VarReassignStmt:
 			currEnv := r.Runtime.CurrEnv()
@@ -151,7 +158,8 @@ func (r *Runner) RunNode(node ast.AstNode) {
 					conditionVal, isConditionBool := val.Value.(bool)
 
 					if !isConditionBool {
-						runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("bool"), value.Expr.ParseExpr(), value.Expr.GetLine())
+						err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("bool"), value.Expr.ParseExpr(), value.Expr.GetLine())
+						utils.EPrint(err.Error())
 					}
 
 					if !conditionVal {
@@ -161,6 +169,25 @@ func (r *Runner) RunNode(node ast.AstNode) {
 					r.RunNode(value.Node)
 				}
 			}
+		case ast.FuncDeclarationStmt:
+			currEnv := r.Runtime.CurrEnv()
+			funcNode, _ := currEnv.GetFunc(value.Name)
+			if funcNode != nil {
+				err := runtime.NewRuntimeError(runtime.IDENTIFIER_ALREADY_EXISTS, value.Name, value.Line)
+				utils.EPrint(err.Error())
+			}
+
+			currEnv.SetFunc(value.Name, value.Node)
+		case ast.FuncCallStmt:
+			currEnv := r.Runtime.CurrEnv()
+			funcNode, _ := currEnv.GetFunc(value.Name)
+
+			if funcNode == nil {
+				err := runtime.NewRuntimeError(runtime.UNDEFINED_IDENTIFIER, value.Name, value.Line)
+				utils.EPrint(err.Error())
+			}
+
+			r.RunNode(*funcNode)
 		}
 	} else {
 		_, err := r.Evaluator.EvaluateExpr(expr)

@@ -212,3 +212,40 @@ func (p *Parser) parseWhileStmt() (*ast.AstNode, *ParserError) {
 
 	return ast.NewAstNode(ast.STMT, ast.NewWhileStmt(expr.ExtractExpr(), *node, p.curr().Line)), nil
 }
+
+func (p *Parser) parseFuncDeclarationStmt() (*ast.AstNode, *ParserError) {
+	funcName, err := p.Parse()
+	if err != nil || funcName == nil || funcName.ExtractExpr() == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	literalExpr, isLiteralExpr := funcName.ExtractExpr().(ast.LiteralExpr)
+
+	if !isLiteralExpr {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if literalExpr.TokenType != tokens.IDENTIFIER {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	p.consume(tokens.LEFT_PAREN, *NewParserError(MISSING_LPAREN, p.curr().Lexeme, p.curr().Line))
+	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
+
+	nodeTbe, err := p.Parse()
+	if err != nil || nodeTbe == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewFuncDeclarationStmt(literalExpr.Value, *nodeTbe, p.curr().Line)), nil
+}
+
+func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
+	funcName := p.curr().Lexeme
+	// checking whether next token is "(" or not is handled within the switch-case statement
+	p.advance()
+
+	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
+
+	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(funcName, p.curr().Line)), nil
+}

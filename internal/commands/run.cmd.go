@@ -17,16 +17,17 @@ func RunCmdHandler(src []byte) {
 	tkns := helpers.ProcessTokens(l, true)
 	p := parser.NewParser(tkns)
 
-	ast, err := p.BuildAst()
+	programAst, err := p.BuildAst()
 	if err != nil {
 		utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
 	}
 
-	vars := runtime.RuntimeVarMapping{}
-	globaEnv := runtime.NewEnvironment(vars, nil)
+	vars := make(runtime.RuntimeVarMapping)
+	funcs := make(runtime.RuntimeFuncMapping)
+	globaEnv := runtime.NewEnvironment(vars, funcs, nil)
 	runtime := runtime.NewRuntime(&[]runtime.Environment{*globaEnv})
-	e := evaluator.NewEvaluator(ast, runtime)
-	r := runner.NewRunner(ast, runtime, e)
+	e := evaluator.NewEvaluator(programAst, runtime)
+	r := runner.NewRunner(programAst, runtime, e)
 
 	for !r.IsAtEnd() {
 		r.Run()

@@ -7,7 +7,7 @@ import (
 )
 
 func EPrint(err string) {
-	fmt.Fprint(os.Stderr, err)
+	fmt.Fprintf(os.Stderr, "%s\n", err)
 	os.Exit(1)
 }
 

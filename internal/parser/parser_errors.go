@@ -8,6 +8,7 @@ const (
 	VARIABLE_NAME_EXPECTED               = "variable name expected"
 
 	MISSING_SEMICOLON = "missing ';'"
+	MISSING_LPAREN    = "missing '('"
 	MISSING_RPAREN    = "missing ')'"
 	MISSING_RBRACE    = "missing '}'"
 	MISSING_IF_BRANCH = "missing 'if' branch"

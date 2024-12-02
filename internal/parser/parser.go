@@ -21,6 +21,10 @@ func NewParser(tokens []tokens.Token) *Parser {
 	}
 }
 
+func (p *Parser) GetCurrLine() int {
+	return p.curr().Line
+}
+
 func (p *Parser) curr() tokens.Token {
 	if p.Idx-1 < 0 {
 		return *tokens.NewToken(tokens.IGNORE, "", "", 1)
@@ -289,11 +293,15 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
 	case tokens.WHILE:
 		return p.parseWhileStmt()
+	case tokens.FUNC:
+		return p.parseFuncDeclarationStmt()
 	case tokens.IDENTIFIER:
-		if (p.prev().Type == tokens.SEMICOLON) || (p.prev().Type == tokens.LEFT_BRACE) {
+		if !p.prev().Type.IsReserved() {
 			switch p.peek().Type {
 			case tokens.EQUAL:
 				return p.parseVarReassignStmt()
+			case tokens.LEFT_PAREN:
+				return p.parseFuncCallStmt()
 			}
 		}
 	}

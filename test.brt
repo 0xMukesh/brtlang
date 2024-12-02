@@ -1,12 +1,17 @@
-yo limit = 10;
-yo fm = 0;
-yo fn = 1;
-yo index = 0;
+vibe fib() {
+  yo lim = 10;
+  yo fm = 0;
+  yo fn = 1;
+  yo idx = 0;
 
-vibin (index < limit) {
-  yap(fm);
-  yo temp = fm;
-  fm = fn;
-  fn = temp + fn;
-  index = index + 1;
+  vibin (idx < lim) {
+    yap(fm);
+
+    yo temp = fm;
+    fm = fn;
+    fn = temp + fm;
+    idx = idx + 1;
+  }
 }
+
+fib();

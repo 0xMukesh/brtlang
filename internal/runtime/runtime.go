@@ -2,6 +2,8 @@ package runtime
 
 import (
 	"fmt"
+
+	"github.com/0xmukesh/interpreter/internal/ast"
 )
 
 type RuntimeValue struct {
@@ -9,6 +11,7 @@ type RuntimeValue struct {
 }
 
 type RuntimeVarMapping = map[string]RuntimeValue
+type RuntimeFuncMapping = map[string]ast.AstNode
 
 func NewRuntimeValue(value interface{}) *RuntimeValue {
 	return &RuntimeValue{
@@ -22,12 +25,14 @@ func (e RuntimeValue) String() string {
 type Environment struct {
 	Parent *Environment
 	Vars   RuntimeVarMapping
+	Funcs  RuntimeFuncMapping
 }
 
-func NewEnvironment(vars RuntimeVarMapping, parent *Environment) *Environment {
+func NewEnvironment(vars RuntimeVarMapping, funcs RuntimeFuncMapping, parent *Environment) *Environment {
 	return &Environment{
 		Parent: parent,
 		Vars:   vars,
+		Funcs:  funcs,
 	}
 }
 func (e *Environment) GetVar(name string) (*RuntimeValue, *Environment) {
@@ -42,8 +47,23 @@ func (e *Environment) GetVar(name string) (*RuntimeValue, *Environment) {
 
 	return &val, e
 }
+func (e *Environment) GetFunc(name string) (*ast.AstNode, *Environment) {
+	val, ok := e.Funcs[name]
+	if !ok {
+		if e.Parent == nil {
+			return nil, nil
+		}
+
+		return e.Parent.GetFunc(name)
+	}
+
+	return &val, e
+}
 func (e *Environment) SetVar(name string, value RuntimeValue) {
 	e.Vars[name] = value
+}
+func (e *Environment) SetFunc(name string, node ast.AstNode) {
+	e.Funcs[name] = node
 }
 
 type Runtime struct {

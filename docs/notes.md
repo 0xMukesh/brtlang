@@ -39,3 +39,4 @@ source code -> lexer -> parser -> (runner <-> evaluator) -> output
 | or      | ehh      |
 | while   | vibin    |
 | for     | chillin  |
+| func    | vibe     |

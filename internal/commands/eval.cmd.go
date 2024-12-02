@@ -22,8 +22,9 @@ func EvaluteCmdHandler(src []byte) {
 		utils.EPrint(fmt.Sprintf("%s\n", pErr.Error()))
 	}
 
-	vars := map[string]runtime.RuntimeValue{}
-	globaEnv := runtime.NewEnvironment(vars, nil)
+	vars := make(runtime.RuntimeVarMapping)
+	funcs := make(runtime.RuntimeFuncMapping)
+	globaEnv := runtime.NewEnvironment(vars, funcs, nil)
 	runtime := runtime.NewRuntime(&[]runtime.Environment{*globaEnv})
 	e := evaluator.NewEvaluator(ast, runtime)
 
