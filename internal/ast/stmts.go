@@ -174,13 +174,15 @@ type FuncDeclarationStmt struct {
 	BaseStmt
 	Name string
 	Node AstNode
+	Args []AstNode
 }
 
 func (s FuncDeclarationStmt) GetExpr() Expr { return nil }
-func NewFuncDeclarationStmt(name string, node AstNode, line int) FuncDeclarationStmt {
+func NewFuncDeclarationStmt(name string, args []AstNode, node AstNode, line int) FuncDeclarationStmt {
 	return FuncDeclarationStmt{
 		Name: name,
 		Node: node,
+		Args: args,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},
@@ -190,12 +192,14 @@ func NewFuncDeclarationStmt(name string, node AstNode, line int) FuncDeclaration
 type FuncCallStmt struct {
 	BaseStmt
 	Name string
+	Args []AstNode
 }
 
 func (s FuncCallStmt) GetExpr() Expr { return nil }
-func NewFuncCallStmt(name string, line int) FuncCallStmt {
+func NewFuncCallStmt(name string, args []AstNode, line int) FuncCallStmt {
 	return FuncCallStmt{
 		Name: name,
+		Args: args,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},

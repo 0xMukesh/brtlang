@@ -47,7 +47,7 @@ func (r *Runner) curr() ast.AstNode {
 func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
 	evaledCondition, err := r.Evaluator.EvaluateExpr(expr)
 	if err != nil {
-		err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("boolean"), "smth", expr.GetLine())
+		err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("boolean"), expr.ParseExpr(), expr.GetLine())
 		utils.EPrint(err.Error())
 	}
 
@@ -59,7 +59,7 @@ func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
 		}
 
 		if conditionVal == true {
-			r.RunNode(node)
+			r.RunNode(node, nil, nil)
 			return true
 		}
 	}
@@ -67,7 +67,7 @@ func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
 	return false
 }
 
-func (r *Runner) RunNode(node ast.AstNode) {
+func (r *Runner) RunNode(node ast.AstNode, envVars *runtime.RuntimeVarMapping, envFuncs *runtime.RuntimeFuncMapping) {
 	expr, isExpr := node.Value.(ast.Expr)
 
 	if !isExpr {
@@ -82,11 +82,19 @@ func (r *Runner) RunNode(node ast.AstNode) {
 		case ast.CreateBlockStmt:
 			localEnvVars := make(runtime.RuntimeVarMapping)
 			localEnvFuncs := make(runtime.RuntimeFuncMapping)
+
+			if envVars != nil {
+				localEnvVars = *envVars
+			}
+			if envFuncs != nil {
+				localEnvFuncs = *envFuncs
+			}
+
 			localEnv := runtime.NewEnvironment(localEnvVars, localEnvFuncs, r.Runtime.CurrEnv())
 			r.Runtime.AddNewEnv(*localEnv)
 
 			for _, node := range value.Nodes {
-				r.RunNode(node)
+				r.RunNode(node, &localEnvVars, &localEnvFuncs)
 			}
 		case ast.CloseBlockStmt:
 			r.Runtime.RemoveLastEnv()
@@ -166,7 +174,7 @@ func (r *Runner) RunNode(node ast.AstNode) {
 						break
 					}
 
-					r.RunNode(value.Node)
+					r.RunNode(value.Node, nil, nil)
 				}
 			}
 		case ast.FuncDeclarationStmt:
@@ -177,17 +185,32 @@ func (r *Runner) RunNode(node ast.AstNode) {
 				utils.EPrint(err.Error())
 			}
 
-			currEnv.SetFunc(value.Name, value.Node)
+			currEnv.SetFunc(value.Name, value.Node, value.Args)
 		case ast.FuncCallStmt:
 			currEnv := r.Runtime.CurrEnv()
-			funcNode, _ := currEnv.GetFunc(value.Name)
+			funcMappingPtr, _ := currEnv.GetFunc(value.Name)
 
-			if funcNode == nil {
+			if funcMappingPtr == nil {
 				err := runtime.NewRuntimeError(runtime.UNDEFINED_IDENTIFIER, value.Name, value.Line)
 				utils.EPrint(err.Error())
 			}
 
-			r.RunNode(*funcNode)
+			funcMapping := *funcMappingPtr
+
+			if len(value.Args) != len(funcMapping.Args) {
+				err := runtime.NewRuntimeError(fmt.Sprintf("invalid number of arguments. expected %d arguments but got %d arguments", len(funcMapping.Args), len(value.Args)), value.Name, value.Line)
+				utils.EPrint(err.Error())
+			}
+
+			argsMapping := make(runtime.RuntimeVarMapping)
+
+			for i, arg := range value.Args {
+				argName := funcMapping.Args[i].Value.(ast.LiteralExpr).Value
+				argValue, _ := r.Evaluator.EvaluateExpr(arg.Value.(ast.Expr))
+				argsMapping[argName] = *argValue
+			}
+
+			r.RunNode(funcMapping.Node, &argsMapping, nil)
 		}
 	} else {
 		_, err := r.Evaluator.EvaluateExpr(expr)
@@ -201,7 +224,7 @@ func (r *Runner) Run() {
 	curr := r.curr()
 
 	if !r.IsAtEnd() {
-		r.RunNode(curr)
+		r.RunNode(curr, nil, nil)
 		r.advance()
 	}
 }

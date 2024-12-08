@@ -1,0 +1,11 @@
+vibe heya(one, two, three) {
+  yo sum = one + two;
+
+  hmm (sum == three) {
+    yap("holy shit!!");
+  } nah {
+    yap("ohio");
+  }
+}
+
+heya(1, 2, 4);

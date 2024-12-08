@@ -230,6 +230,25 @@ func (p *Parser) parseFuncDeclarationStmt() (*ast.AstNode, *ParserError) {
 	}
 
 	p.consume(tokens.LEFT_PAREN, *NewParserError(MISSING_LPAREN, p.curr().Lexeme, p.curr().Line))
+
+	var args []ast.AstNode
+
+	if p.peek().Type != tokens.RIGHT_PAREN {
+		// equivalent to do-while loop in java
+		for ok := true; ok; ok = p.matchAndAdvance(tokens.COMMA) {
+			node, err := p.Parse()
+			if err != nil || node == nil {
+				return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+			}
+
+			args = append(args, *node)
+		}
+	}
+
+	if len(args) >= 255 {
+		return nil, NewParserError("can't have more than 255 arguments", p.curr().Lexeme, p.curr().Line)
+	}
+
 	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
 
 	nodeTbe, err := p.Parse()
@@ -237,7 +256,7 @@ func (p *Parser) parseFuncDeclarationStmt() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	return ast.NewAstNode(ast.STMT, ast.NewFuncDeclarationStmt(literalExpr.Value, *nodeTbe, p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewFuncDeclarationStmt(literalExpr.Value, args, *nodeTbe, p.curr().Line)), nil
 }
 
 func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
@@ -245,7 +264,25 @@ func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
 	// checking whether next token is "(" or not is handled within the switch-case statement
 	p.advance()
 
+	var args []ast.AstNode
+
+	if p.peek().Type != tokens.RIGHT_PAREN {
+		// equivalent to do-while loop in java
+		for ok := true; ok; ok = p.matchAndAdvance(tokens.COMMA) {
+			node, err := p.Parse()
+			if err != nil || node == nil {
+				return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+			}
+
+			args = append(args, *node)
+		}
+	}
+
+	if len(args) >= 255 {
+		return nil, NewParserError("can't have more than 255 arguments", p.curr().Lexeme, p.curr().Line)
+	}
+
 	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
 
-	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(funcName, p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(funcName, args, p.curr().Line)), nil
 }

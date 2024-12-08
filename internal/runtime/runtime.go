@@ -11,7 +11,11 @@ type RuntimeValue struct {
 }
 
 type RuntimeVarMapping = map[string]RuntimeValue
-type RuntimeFuncMapping = map[string]ast.AstNode
+type FuncMapping struct {
+	Node ast.AstNode
+	Args []ast.AstNode
+}
+type RuntimeFuncMapping = map[string]FuncMapping
 
 func NewRuntimeValue(value interface{}) *RuntimeValue {
 	return &RuntimeValue{
@@ -47,7 +51,7 @@ func (e *Environment) GetVar(name string) (*RuntimeValue, *Environment) {
 
 	return &val, e
 }
-func (e *Environment) GetFunc(name string) (*ast.AstNode, *Environment) {
+func (e *Environment) GetFunc(name string) (*FuncMapping, *Environment) {
 	val, ok := e.Funcs[name]
 	if !ok {
 		if e.Parent == nil {
@@ -62,8 +66,11 @@ func (e *Environment) GetFunc(name string) (*ast.AstNode, *Environment) {
 func (e *Environment) SetVar(name string, value RuntimeValue) {
 	e.Vars[name] = value
 }
-func (e *Environment) SetFunc(name string, node ast.AstNode) {
-	e.Funcs[name] = node
+func (e *Environment) SetFunc(name string, node ast.AstNode, args []ast.AstNode) {
+	e.Funcs[name] = FuncMapping{
+		Node: node,
+		Args: args,
+	}
 }
 
 type Runtime struct {
