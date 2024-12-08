@@ -270,6 +270,7 @@ func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
 		// equivalent to do-while loop in java
 		for ok := true; ok; ok = p.matchAndAdvance(tokens.COMMA) {
 			node, err := p.Parse()
+
 			if err != nil || node == nil {
 				return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
 			}

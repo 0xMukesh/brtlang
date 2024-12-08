@@ -1,5 +1,4 @@
-vibe fib() {
-  yo lim = 10;
+vibe fib(lim) {
   yo fm = 0;
   yo fn = 1;
   yo idx = 0;
@@ -14,4 +13,4 @@ vibe fib() {
   }
 }
 
-fib();
+fib(100);

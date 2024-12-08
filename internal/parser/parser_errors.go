@@ -32,5 +32,5 @@ func NewParserError(msg string, at string, line int) *ParserError {
 }
 
 func (e ParserError) Error() string {
-	return fmt.Sprintf("An error occuring while parsing source code: [line %d] Error at '%s': %s", e.Line, e.At, e.Message)
+	return fmt.Sprintf("An error occured in parser: [line %d] Error at '%s': %s", e.Line, e.At, e.Message)
 }

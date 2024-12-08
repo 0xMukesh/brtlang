@@ -24,8 +24,9 @@ const (
 )
 
 func (e RuntimeError) Error() string {
-	return fmt.Sprintf("[line %d] Error at '%s': %s", e.Line, e.At, e.Message)
+	return fmt.Sprintf("Runtime error: [line %d] Error at '%s': %s", e.Line, e.At, e.Message)
 }
+
 func NewRuntimeError(msg string, at string, line int) *RuntimeError {
 	return &RuntimeError{
 		Message: msg,
