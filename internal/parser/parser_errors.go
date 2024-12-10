@@ -15,6 +15,8 @@ const (
 
 	INVALID_VARIABLE_NAME = "invalid variable name"
 	INVALID_EXPRESSION    = "invalid expression"
+
+	IDENTIFIER_ALREADY_EXISTS = "identifier already exists"
 )
 
 type ParserError struct {

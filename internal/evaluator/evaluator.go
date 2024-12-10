@@ -119,7 +119,7 @@ func (e *Evaluator) evaluteLiteralExpr(literalExpr ast.LiteralExpr) (*runtime.Ru
 }
 
 func (e *Evaluator) evaluteGroupingExpr(groupingExpr ast.GroupingExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {
-	return e.EvaluateExpr(groupingExpr.Expr)
+	return e.EvaluateExpr(groupingExpr.Node.ExtractExpr())
 }
 
 func (e *Evaluator) evaluteLogicalExpr(logicalExpr ast.LogicalExpr) (*runtime.RuntimeValue, *runtime.RuntimeError) {

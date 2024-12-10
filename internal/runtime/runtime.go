@@ -98,3 +98,5 @@ func (r *Runtime) CurrEnv() *Environment {
 	}
 	return nil
 }
+
+type EndOfProgram struct{}

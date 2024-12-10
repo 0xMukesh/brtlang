@@ -6,20 +6,16 @@ import (
 )
 
 func (p *Parser) parsePrintStmt() (*ast.AstNode, *ParserError) {
-	node, err := p.Parse()
+	nodePtr, err := p.Parse()
 	if err != nil {
 		return nil, err
 	}
 
-	if node != nil {
-		expr, err := p.extractExpr(*node)
-		if err != nil {
-			return nil, err
-		}
-
+	if nodePtr != nil {
+		node := *nodePtr
 		err = NewParserError(MISSING_SEMICOLON, p.curr().Lexeme, p.curr().Line)
 		p.consume(tokens.SEMICOLON, *err)
-		return ast.NewAstNode(ast.STMT, ast.NewPrintStmt(expr, p.curr().Line)), nil
+		return ast.NewAstNode(ast.STMT, ast.NewPrintStmt(node, p.curr().Line)), nil
 	} else {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
@@ -256,7 +252,17 @@ func (p *Parser) parseFuncDeclarationStmt() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	return ast.NewAstNode(ast.STMT, ast.NewFuncDeclarationStmt(literalExpr.Value, args, *nodeTbe, p.curr().Line)), nil
+	funcDeclarationStmt := ast.NewFuncDeclarationStmt(literalExpr.Value, args, *nodeTbe, p.curr().Line)
+
+	currEnv := p.Runtime.CurrEnv()
+	funcNode, _ := currEnv.GetFunc(funcDeclarationStmt.Name)
+	if funcNode != nil {
+		return nil, NewParserError(IDENTIFIER_ALREADY_EXISTS, p.curr().Lexeme, p.curr().Line)
+	}
+
+	currEnv.SetFunc(funcDeclarationStmt.Name, funcDeclarationStmt.Node, funcDeclarationStmt.Args)
+
+	return ast.NewAstNode(ast.STMT, funcDeclarationStmt), nil
 }
 
 func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
@@ -279,11 +285,46 @@ func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
 		}
 	}
 
+	var returnExpr ast.Expr
+
+	currEnvPtr := p.Runtime.CurrEnv()
+	if currEnvPtr != nil {
+		currEnv := *currEnvPtr
+
+		funcNode, ok := currEnv.Funcs[funcName]
+		if ok {
+			switch v := funcNode.Node.Value.(type) {
+			case ast.CreateBlockStmt:
+				for _, node := range v.Nodes {
+					_, ok := node.Value.(ast.ReturnStmt)
+					if ok {
+						returnExpr = node.ExtractExpr()
+					}
+				}
+			case ast.ReturnStmt:
+				returnExpr = v.Node.ExtractExpr()
+			}
+		}
+	}
+
 	if len(args) >= 255 {
 		return nil, NewParserError("can't have more than 255 arguments", p.curr().Lexeme, p.curr().Line)
 	}
 
 	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
 
-	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(funcName, args, p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(funcName, args, returnExpr, p.curr().Line)), nil
+}
+
+func (p *Parser) parseReturnStmt() (*ast.AstNode, *ParserError) {
+	node, err := p.Parse()
+	if err != nil {
+		return nil, err
+	}
+
+	if node == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewReturnStmt(*node, p.curr().Line)), nil
 }

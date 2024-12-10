@@ -5,19 +5,22 @@ import (
 	"strings"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
+	"github.com/0xmukesh/interpreter/internal/runtime"
 	"github.com/0xmukesh/interpreter/internal/tokens"
 	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
 type Parser struct {
-	Tokens []tokens.Token
-	Idx    int
+	Tokens  []tokens.Token
+	Runtime *runtime.Runtime
+	Idx     int
 }
 
-func NewParser(tokens []tokens.Token) *Parser {
+func NewParser(tokens []tokens.Token, runtime *runtime.Runtime) *Parser {
 	return &Parser{
-		Tokens: tokens,
-		Idx:    0,
+		Tokens:  tokens,
+		Runtime: runtime,
+		Idx:     0,
 	}
 }
 
@@ -94,7 +97,8 @@ func (p *Parser) consume(expected tokens.TokenType, err ParserError) {
 func (p *Parser) extractExpr(node ast.AstNode) (ast.Expr, *ParserError) {
 	expr := node.ExtractExpr()
 	if expr == nil {
-		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+		err := NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+		return nil, err
 	}
 
 	return expr, nil
@@ -295,6 +299,8 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return p.parseWhileStmt()
 	case tokens.FUNC:
 		return p.parseFuncDeclarationStmt()
+	case tokens.RETURN:
+		return p.parseReturnStmt()
 	case tokens.IDENTIFIER:
 		if !p.prev().Type.IsReserved() {
 			switch p.peek().Type {

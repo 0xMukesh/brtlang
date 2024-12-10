@@ -19,21 +19,21 @@ type AstNode struct {
 }
 
 func (n AstNode) ExtractExpr() Expr {
-	value, ok := n.Value.(Expr)
-	if !ok {
-		return nil
+	var expr Expr
+
+	switch v := n.Value.(type) {
+	case Expr:
+		value, ok := n.Value.(Expr)
+
+		if !ok {
+			value = nil
+		}
+
+		expr = value
+	case Stmt:
+		expr = v.GetExpr()
 	}
 
-	return value
-}
-
-func (n AstNode) ExtractStmtExpr() Expr {
-	value, ok := n.Value.(Stmt)
-	if !ok {
-		return nil
-	}
-
-	expr := value.GetExpr()
 	return expr
 }
 

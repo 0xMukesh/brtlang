@@ -49,15 +49,15 @@ func NewLiteralExpr(tokenType tokens.TokenType, value string, line int) LiteralE
 
 type GroupingExpr struct {
 	BaseExpr
-	Expr Expr
+	Node AstNode
 }
 
 func (e GroupingExpr) ParseExpr() string {
-	return fmt.Sprintf("(group %s)", e.Expr.ParseExpr())
+	return fmt.Sprintf("(group %s)", e.Node.ExtractExpr().ParseExpr())
 }
-func NewGroupingExpr(expr Expr, line int) GroupingExpr {
+func NewGroupingExpr(node AstNode, line int) GroupingExpr {
 	return GroupingExpr{
-		Expr: expr,
+		Node: node,
 		BaseExpr: BaseExpr{
 			Line: line,
 		},

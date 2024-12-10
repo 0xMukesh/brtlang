@@ -59,13 +59,13 @@ func NewVarReassignStmt(name string, expr Expr, line int) VarReassignStmt {
 
 type PrintStmt struct {
 	BaseStmt
-	Expr Expr
+	Node AstNode
 }
 
-func (s PrintStmt) GetExpr() Expr { return s.Expr }
-func NewPrintStmt(expr Expr, line int) PrintStmt {
+func (s PrintStmt) GetExpr() Expr { return s.Node.ExtractExpr() }
+func NewPrintStmt(node AstNode, line int) PrintStmt {
 	return PrintStmt{
-		Expr: expr,
+		Node: node,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},
@@ -191,15 +191,36 @@ func NewFuncDeclarationStmt(name string, args []AstNode, node AstNode, line int)
 
 type FuncCallStmt struct {
 	BaseStmt
-	Name string
-	Args []AstNode
+	Name       string
+	Args       []AstNode
+	ReturnExpr Expr
 }
 
-func (s FuncCallStmt) GetExpr() Expr { return nil }
-func NewFuncCallStmt(name string, args []AstNode, line int) FuncCallStmt {
+func (s FuncCallStmt) GetExpr() Expr {
+	return s.ReturnExpr
+}
+func NewFuncCallStmt(name string, args []AstNode, returnExpr Expr, line int) FuncCallStmt {
 	return FuncCallStmt{
-		Name: name,
-		Args: args,
+		Name:       name,
+		Args:       args,
+		ReturnExpr: returnExpr,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+type ReturnStmt struct {
+	BaseStmt
+	Node AstNode
+}
+
+func (s ReturnStmt) GetExpr() Expr {
+	return s.Node.ExtractExpr()
+}
+func NewReturnStmt(node AstNode, line int) ReturnStmt {
+	return ReturnStmt{
+		Node: node,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},

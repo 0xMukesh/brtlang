@@ -64,8 +64,10 @@ const (
 
 	// 36
 	FUNC
-	CLASS
 	RETURN
+
+	// 38
+	CLASS
 	SUPER
 	THIS
 )
@@ -106,8 +108,8 @@ var ReservedKeywordsMapping = map[TokenType]string{
 	WHILE:   WHILE.String(),
 	FOR:     FOR.String(),
 	FUNC:    FUNC.String(),
-	CLASS:   CLASS.String(),
 	RETURN:  RETURN.String(),
+	CLASS:   CLASS.String(),
 	SUPER:   SUPER.String(),
 	THIS:    THIS.String(),
 }
@@ -197,10 +199,10 @@ func (t TokenType) String() string {
 		return "CHILLIN"
 	case FUNC:
 		return "VIBE"
+	case RETURN:
+		return "YOINK"
 	case CLASS:
 		return "CLASS"
-	case RETURN:
-		return "RETURN"
 	case SUPER:
 		return "SUPER"
 	case THIS:

@@ -2,6 +2,7 @@ package runner
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
 	"github.com/0xmukesh/interpreter/internal/evaluator"
@@ -59,7 +60,7 @@ func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
 		}
 
 		if conditionVal == true {
-			r.RunNode(node, nil, nil)
+			r.RunNode(node, r.Runtime.CurrEnv())
 			return true
 		}
 	}
@@ -67,42 +68,25 @@ func (r *Runner) EvalAndRunNode(expr ast.Expr, node ast.AstNode) bool {
 	return false
 }
 
-func (r *Runner) RunNode(node ast.AstNode, envVars *runtime.RuntimeVarMapping, envFuncs *runtime.RuntimeFuncMapping) {
+func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runtime.RuntimeValue {
 	expr, isExpr := node.Value.(ast.Expr)
 
 	if !isExpr {
 		switch value := node.Value.(type) {
 		case ast.PrintStmt:
-			val, err := r.Evaluator.EvaluateExpr(value.GetExpr())
-			if err != nil {
-				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
-			}
-
+			val := r.RunNode(value.Node, r.Runtime.CurrEnv())
 			fmt.Println(val)
 		case ast.CreateBlockStmt:
-			localEnvVars := make(runtime.RuntimeVarMapping)
-			localEnvFuncs := make(runtime.RuntimeFuncMapping)
-
-			if envVars != nil {
-				localEnvVars = *envVars
-			}
-			if envFuncs != nil {
-				localEnvFuncs = *envFuncs
-			}
-
-			localEnv := runtime.NewEnvironment(localEnvVars, localEnvFuncs, r.Runtime.CurrEnv())
-			r.Runtime.AddNewEnv(*localEnv)
-
-			for _, node := range value.Nodes {
-				r.RunNode(node, &localEnvVars, &localEnvFuncs)
+			if localEnv != nil {
+				r.Runtime.AddNewEnv(*localEnv)
+				for _, node := range value.Nodes {
+					r.RunNode(node, localEnv)
+				}
 			}
 		case ast.CloseBlockStmt:
 			r.Runtime.RemoveLastEnv()
 		case ast.VarAssignStmt:
-			val, err := r.Evaluator.EvaluateExpr(value.Expr)
-			if err != nil {
-				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
-			}
+			val := r.RunNode(node, r.Runtime.CurrEnv())
 
 			if val != nil {
 				currEnv := r.Runtime.CurrEnv()
@@ -174,18 +158,9 @@ func (r *Runner) RunNode(node ast.AstNode, envVars *runtime.RuntimeVarMapping, e
 						break
 					}
 
-					r.RunNode(value.Node, nil, nil)
+					r.RunNode(value.Node, r.Runtime.CurrEnv())
 				}
 			}
-		case ast.FuncDeclarationStmt:
-			currEnv := r.Runtime.CurrEnv()
-			funcNode, _ := currEnv.GetFunc(value.Name)
-			if funcNode != nil {
-				err := runtime.NewRuntimeError(runtime.IDENTIFIER_ALREADY_EXISTS, value.Name, value.Line)
-				utils.EPrint(err.Error())
-			}
-
-			currEnv.SetFunc(value.Name, value.Node, value.Args)
 		case ast.FuncCallStmt:
 			currEnv := r.Runtime.CurrEnv()
 			funcMappingPtr, _ := currEnv.GetFunc(value.Name)
@@ -203,6 +178,7 @@ func (r *Runner) RunNode(node ast.AstNode, envVars *runtime.RuntimeVarMapping, e
 			}
 
 			argsMapping := make(runtime.RuntimeVarMapping)
+			localEnv := runtime.NewEnvironment(argsMapping, nil, r.Runtime.CurrEnv())
 
 			for i, arg := range value.Args {
 				argName := funcMapping.Args[i].Value.(ast.LiteralExpr).Value
@@ -210,21 +186,49 @@ func (r *Runner) RunNode(node ast.AstNode, envVars *runtime.RuntimeVarMapping, e
 				argsMapping[argName] = *argValue
 			}
 
-			r.RunNode(funcMapping.Node, &argsMapping, nil)
+			localEnv.Vars = argsMapping
+			r.Runtime.AddNewEnv(*localEnv)
+
+			r.RunNode(funcMapping.Node, r.Runtime.CurrEnv())
+		case ast.ReturnStmt:
+			val := r.RunNode(value.Node, r.Runtime.CurrEnv())
+			if val == nil {
+				os.Exit(0)
+			}
+			return val
 		}
 	} else {
-		_, err := r.Evaluator.EvaluateExpr(expr)
-		if err != nil {
-			utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+		groupingExpr, ok := expr.(ast.GroupingExpr)
+
+		if ok {
+			if _, ok := groupingExpr.Node.Value.(ast.FuncCallStmt); ok {
+				return r.RunNode(groupingExpr.Node, r.Runtime.CurrEnv())
+			}
+
+			val, err := r.Evaluator.EvaluateExpr(groupingExpr)
+			if err != nil {
+				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+			}
+
+			return val
+		} else {
+			val, err := r.Evaluator.EvaluateExpr(expr)
+			if err != nil {
+				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
+			}
+
+			return val
 		}
 	}
+
+	return nil
 }
 
 func (r *Runner) Run() {
 	curr := r.curr()
 
 	if !r.IsAtEnd() {
-		r.RunNode(curr, nil, nil)
+		r.RunNode(curr, r.Runtime.CurrEnv())
 		r.advance()
 	}
 }

@@ -6,21 +6,17 @@ import (
 )
 
 func (p *Parser) parseGroupingExpr() (*ast.AstNode, *ParserError) {
-	node, err := p.Parse()
+	nodePtr, err := p.Parse()
 	if err != nil {
 		return nil, err
 	}
 
-	if node != nil {
+	if nodePtr != nil {
 		err := NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line)
 		p.consume(tokens.RIGHT_PAREN, *err)
 
-		expr, err := p.extractExpr(*node)
-		if err != nil {
-			return nil, err
-		}
-
-		return ast.NewAstNode(ast.EXPR, ast.NewGroupingExpr(expr, p.curr().Line)), nil
+		node := *nodePtr
+		return ast.NewAstNode(ast.EXPR, ast.NewGroupingExpr(node, p.curr().Line)), nil
 	}
 
 	return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
