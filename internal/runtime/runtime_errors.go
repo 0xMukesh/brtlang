@@ -15,8 +15,8 @@ const (
 	UNDEFINED_IDENTIFIER      = "damn bruv, this identifier got that invisible drip"
 	IDENTIFIER_ALREADY_EXISTS = "nah, the sequel ain't happening for this identifier"
 
-	INVALID_OPERAND  = "this operand ain't it, chief"
-	INVALID_OPERATOR = "this operator ain't it, chief"
+	INVALID_OPERAND_TEMPLATE = "this operand ain't it, chief. got %s"
+	INVALID_OPERATOR         = "this operator ain't it, chief"
 )
 
 func (e RuntimeError) Error() string {

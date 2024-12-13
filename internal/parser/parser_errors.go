@@ -3,7 +3,9 @@ package parser
 import "fmt"
 
 const (
-	EXPRESSION_EXPECTED                  = "yo, where's the vibe? i was expecting an expression over here"
+	EXPRESSION_EXPECTED          = "yo, where's the vibe? i was expecting an expression over here"
+	EXPRESSION_EXPECTED_TEMPLATE = "yo, where's the vibe? i was expecting an %s expression over here"
+
 	EXPRESSION_AFTER_ASSIGNMENT_EXPECTED = "vibe check failed, blud misunderstood the assignment. i was expecting an expression after assignment"
 	VARIABLE_NAME_EXPECTED               = "yo, where's the vibe? i was expecting a variable name over here"
 
@@ -12,6 +14,8 @@ const (
 	MISSING_RPAREN    = "nahh, you left me hanging. where's ')' at?"
 	MISSING_RBRACE    = "nahh, you left me hanging. where's '}' at?"
 	MISSING_IF_BRANCH = "bruh, where's the 'if' branch? you can't just skip it like that"
+
+	INVALID_TOKEN_TYPE_TEMPLATE = "ay, that token isn't allowed. expected %s token"
 
 	INVALID_VARIABLE_NAME = "who tf even allowed you to name this variable?"
 	INVALID_EXPRESSION    = "invalid expression? wow, didn't know we were coding in clown mode today"

@@ -23,6 +23,7 @@ func (s BaseStmt) IsExpr() bool     { return false }
 func (s BaseStmt) IsStmt() bool     { return true }
 func (s BaseStmt) isAstValue() bool { return true }
 
+// rizz (name) = (node);
 type VarAssignStmt struct {
 	BaseStmt
 	Node AstNode
@@ -40,6 +41,7 @@ func NewVarAssignStmt(name string, node AstNode, line int) VarAssignStmt {
 	}
 }
 
+// (name) = (node);
 type VarReassignStmt struct {
 	BaseStmt
 	Node AstNode
@@ -57,6 +59,7 @@ func NewVarReassignStmt(name string, node AstNode, line int) VarReassignStmt {
 	}
 }
 
+// yap(node);
 type PrintStmt struct {
 	BaseStmt
 	Node AstNode
@@ -72,6 +75,9 @@ func NewPrintStmt(node AstNode, line int) PrintStmt {
 	}
 }
 
+//	{
+//	  ...nodes
+//	}
 type CreateBlockStmt struct {
 	BaseStmt
 	Nodes []AstNode
@@ -100,6 +106,9 @@ func NewCloseBlockStmt(line int) CloseBlockStmt {
 	}
 }
 
+//	edging(node) {
+//	  ...if branch
+//	}
 type IfStmt struct {
 	BaseStmt
 	Node           AstNode
@@ -121,6 +130,9 @@ func NewIfStmt(node AstNode, ifBranch AstNode, elseIfBranches *[]ElseIfStmt, els
 	}
 }
 
+//	mid(node) {
+//	  ...else if branch
+//	}
 type ElseIfStmt struct {
 	BaseStmt
 	Node   AstNode
@@ -138,6 +150,9 @@ func NewElseIfStmt(node AstNode, branch AstNode, line int) ElseIfStmt {
 	}
 }
 
+//	amogus {
+//	  ...else branch
+//	}
 type ElseStmt struct {
 	BaseStmt
 	Branch AstNode
@@ -153,6 +168,9 @@ func NewElseStmt(branch AstNode, line int) ElseStmt {
 	}
 }
 
+//	vibin(node) {
+//	  ...branch
+//	}
 type WhileStmt struct {
 	BaseStmt
 	Node   AstNode
@@ -170,6 +188,9 @@ func NewWhileStmt(node AstNode, branch AstNode, line int) WhileStmt {
 	}
 }
 
+//	skibidi (name)(...args) {
+//	  ...node
+//	}
 type FuncDeclarationStmt struct {
 	BaseStmt
 	Name string
@@ -189,6 +210,7 @@ func NewFuncDeclarationStmt(name string, args []AstNode, node AstNode, line int)
 	}
 }
 
+// (name)(...args);
 type FuncCallStmt struct {
 	BaseStmt
 	Name       string
@@ -208,17 +230,72 @@ func NewFuncCallStmt(name string, args []AstNode, returnNode AstNode, line int) 
 	}
 }
 
+// bussin (node);
 type ReturnStmt struct {
 	BaseStmt
 	Node AstNode
 }
 
-func (s ReturnStmt) GetExpr() Expr {
-	return s.Node.ExtractExpr()
-}
+func (s ReturnStmt) GetExpr() Expr { return s.Node.ExtractExpr() }
 func NewReturnStmt(node AstNode, line int) ReturnStmt {
 	return ReturnStmt{
 		Node: node,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+// (name)++;
+type IncrementStmt struct {
+	BaseStmt
+	Name string
+}
+
+func (s IncrementStmt) GetExpr() Expr { return nil }
+func NewIncrementStmt(name string, line int) IncrementStmt {
+	return IncrementStmt{
+		Name: name,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+// (name)--;
+type DecrementStmt struct {
+	BaseStmt
+	Name string
+}
+
+func (s DecrementStmt) GetExpr() Expr { return nil }
+func NewDecrementStmt(name string, line int) DecrementStmt {
+	return DecrementStmt{
+		Name: name,
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}
+
+//	chillin((init); (condition); (update)) {
+//	  ...node
+//	}
+type ForStmt struct {
+	BaseStmt
+	Node      AstNode
+	Init      Expr
+	Condition Expr
+	Update    Expr
+}
+
+func (s ForStmt) GetExpr() Expr { return nil }
+func NewForStmt(node AstNode, init, condition, update Expr, line int) ForStmt {
+	return ForStmt{
+		Node:      node,
+		Init:      init,
+		Condition: condition,
+		Update:    update,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},

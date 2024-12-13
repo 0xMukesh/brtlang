@@ -16,7 +16,9 @@ const (
 	SEMICOLON
 
 	PLUS
+	PLUS_PLUS
 	MINUS
+	MINUS_MINUS
 	DOT
 	STAR
 	SLASH
@@ -64,7 +66,9 @@ var TknLiteralMapping = map[TokenType]string{
 	COMMA:         ",",
 	SEMICOLON:     ";",
 	PLUS:          "+",
+	PLUS_PLUS:     "++",
 	MINUS:         "-",
+	MINUS_MINUS:   "--",
 	DOT:           ".",
 	STAR:          "*",
 	SLASH:         "/",
@@ -125,8 +129,12 @@ func (t TokenType) String() string {
 		return "SEMICOLON"
 	case PLUS:
 		return "PLUS"
+	case PLUS_PLUS:
+		return "PLUS_PLUS"
 	case MINUS:
 		return "MINUS"
+	case MINUS_MINUS:
+		return "MINUS_MINUS"
 	case DOT:
 		return "DOT"
 	case STAR:

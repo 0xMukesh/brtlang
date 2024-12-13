@@ -1,0 +1,28 @@
+rizz int = 7;
+rizz decimal = 4;
+
+// basic arithmetic
+yap(int+decimal);
+yap(int-decimal);
+yap(int*decimal);
+yap(int/decimal);
+yap(int%decimal);
+
+// comparision
+yap(int>decimal);
+yap(int>=decimal);
+yap(int<decimal);
+yap(int<=decimal);
+yap(int==decimal);
+yap(int!=decimal);
+
+// increment
+int++;
+int++;
+int++;
+yap(int);
+
+// decrement
+int--;
+int--;
+yap(int);

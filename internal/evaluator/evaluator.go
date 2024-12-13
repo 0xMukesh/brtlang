@@ -244,6 +244,10 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
+		if rightNum == 0 {
+			return nil, runtime.NewRuntimeError("ya buddy did you really graduate high school? you can't divide by 0, bruh", binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
 		return runtime.NewRuntimeValue(leftNum / rightNum), nil
 	case tokens.MODULO:
 		leftNum, isLeftNum := left.Value.(float64)
@@ -258,6 +262,10 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 
 		if !(isLeftInt && isRightInt) {
 			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("int"), binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		if rightNum == 0 {
+			return nil, runtime.NewRuntimeError("ya buddy did you really graduate high school? you can't divide by 0, bruh", binaryExpr.Operator.Literal(), binaryExpr.Line)
 		}
 
 		return runtime.NewRuntimeValue(float64(int(leftNum) % int(rightNum))), nil

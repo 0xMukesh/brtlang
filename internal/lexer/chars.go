@@ -4,52 +4,45 @@ import (
 	"github.com/0xmukesh/interpreter/internal/tokens"
 )
 
-// scans "=" and "==" tokens
-func (l *Lexer) LexEqualChar() (*tokens.Token, *LexerError) {
+func (l *Lexer) LexDoubleCharBuilder(expectedNextChar byte, doubleCharTknType, singleCharTknType tokens.TokenType) (*tokens.Token, *LexerError) {
 	nextChar := l.peek()
 
-	if nextChar == '=' {
+	if nextChar == expectedNextChar {
 		l.read()
-		return tokens.NewToken(tokens.EQUAL_EQUAL, tokens.EQUAL_EQUAL.Literal(), "null", l.Line), nil
+		return tokens.NewToken(doubleCharTknType, doubleCharTknType.Literal(), "null", l.Line), nil
 	}
 
-	return tokens.NewToken(tokens.EQUAL, tokens.EQUAL.Literal(), "null", l.Line), nil
+	return tokens.NewToken(singleCharTknType, singleCharTknType.Literal(), "null", l.Line), nil
+}
+
+// scans "=" and "==" tokens
+func (l *Lexer) LexEqualChar() (*tokens.Token, *LexerError) {
+	return l.LexDoubleCharBuilder('=', tokens.EQUAL_EQUAL, tokens.EQUAL)
 }
 
 // scans "!" and "!=" tokens
 func (l *Lexer) LexBangChar() (*tokens.Token, *LexerError) {
-	nextChar := l.peek()
-
-	if nextChar == '=' {
-		l.read()
-		return tokens.NewToken(tokens.BANG_EQUAL, tokens.BANG_EQUAL.Literal(), "null", l.Line), nil
-	}
-
-	return tokens.NewToken(tokens.BANG, tokens.BANG.Literal(), "null", l.Line), nil
+	return l.LexDoubleCharBuilder('=', tokens.BANG_EQUAL, tokens.BANG)
 }
 
 // scans "<" and "<=" tokens
 func (l *Lexer) LexLessChar() (*tokens.Token, *LexerError) {
-	nextChar := l.peek()
-
-	if nextChar == '=' {
-		l.read()
-		return tokens.NewToken(tokens.LESS_EQUAL, tokens.LESS_EQUAL.Literal(), "null", l.Line), nil
-	}
-
-	return tokens.NewToken(tokens.LESS, tokens.LESS.Literal(), "null", l.Line), nil
+	return l.LexDoubleCharBuilder('=', tokens.LESS_EQUAL, tokens.LESS)
 }
 
 // scans ">" and ">=" tokens
 func (l *Lexer) LexGreaterChar() (*tokens.Token, *LexerError) {
-	nextChar := l.peek()
+	return l.LexDoubleCharBuilder('=', tokens.GREATER_EQUAL, tokens.GREATER)
+}
 
-	if nextChar == '=' {
-		l.read()
-		return tokens.NewToken(tokens.GREATER_EQUAL, tokens.GREATER_EQUAL.Literal(), "null", l.Line), nil
-	}
+// scans "+" and "++" tokens
+func (l *Lexer) LexPlusChar() (*tokens.Token, *LexerError) {
+	return l.LexDoubleCharBuilder('+', tokens.PLUS_PLUS, tokens.PLUS)
+}
 
-	return tokens.NewToken(tokens.GREATER, tokens.GREATER.Literal(), "null", l.Line), nil
+// scans "-" and "--" tokens
+func (l *Lexer) LexMinusChar() (*tokens.Token, *LexerError) {
+	return l.LexDoubleCharBuilder('-', tokens.MINUS_MINUS, tokens.MINUS)
 }
 
 // scans "/" token and "//" (comment)
@@ -93,9 +86,4 @@ func (l *Lexer) LexPipeChar() (*tokens.Token, *LexerError) {
 	}
 
 	return nil, NewLexerError(`missing "|" character`, l.Line)
-}
-
-// scans "%" token
-func (l *Lexer) LexModuloChar() (*tokens.Token, *LexerError) {
-	return tokens.NewToken(tokens.MODULO, tokens.MODULO.Literal(), "null", l.Line), nil
 }

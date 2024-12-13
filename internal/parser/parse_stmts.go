@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/0xmukesh/interpreter/internal/ast"
 	"github.com/0xmukesh/interpreter/internal/tokens"
+	"github.com/0xmukesh/interpreter/internal/utils"
 )
 
 func (p *Parser) parsePrintStmt() (*ast.AstNode, *ParserError) {
@@ -316,4 +317,42 @@ func (p *Parser) parseReturnStmt() (*ast.AstNode, *ParserError) {
 	}
 
 	return ast.NewAstNode(ast.STMT, ast.NewReturnStmt(*node, p.curr().Line)), nil
+}
+
+func (p *Parser) parseIncrementStmt() (*ast.AstNode, *ParserError) {
+	varName := p.curr().Lexeme
+	p.advance()
+
+	if utils.IsReservedKeyword(varName) {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if varName == "" {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if !utils.IsAlphaOnly(varName) {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewIncrementStmt(varName, p.curr().Line)), nil
+}
+
+func (p *Parser) parseDecrementStmt() (*ast.AstNode, *ParserError) {
+	varName := p.curr().Lexeme
+	p.advance()
+
+	if utils.IsReservedKeyword(varName) {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if varName == "" {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if !utils.IsAlphaOnly(varName) {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewDecrementStmt(varName, p.curr().Line)), nil
 }

@@ -91,8 +91,10 @@ func (l *Lexer) Lex() (*tokens.Token, *LexerError) {
 				tkn, err = l.LexGreaterChar()
 			case tokens.SLASH:
 				tkn, err = l.LexSlashChar()
-			case tokens.MODULO:
-				tkn, err = l.LexModuloChar()
+			case tokens.PLUS:
+				tkn, err = l.LexPlusChar()
+			case tokens.MINUS:
+				tkn, err = l.LexMinusChar()
 			default:
 				tkn = tokens.NewToken(*tknType, string(l.Char), "null", l.Line)
 			}

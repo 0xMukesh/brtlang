@@ -187,11 +187,11 @@ func (p *Parser) comparisonRule() (*ast.AstNode, *ParserError) {
 }
 
 func (p *Parser) subtractionRule() (*ast.AstNode, *ParserError) {
-	return p.binaryRuleBuilder(p.subtractionRule, p.additionRule, tokens.MINUS)
+	return p.binaryRuleBuilder(p.subtractionRule, p.additionRule, tokens.MINUS, tokens.MINUS_MINUS)
 }
 
 func (p *Parser) additionRule() (*ast.AstNode, *ParserError) {
-	return p.binaryRuleBuilder(p.additionRule, p.multiplicationRule, tokens.PLUS)
+	return p.binaryRuleBuilder(p.additionRule, p.multiplicationRule, tokens.PLUS, tokens.PLUS_PLUS)
 }
 
 func (p *Parser) multiplicationRule() (*ast.AstNode, *ParserError) {
@@ -312,6 +312,10 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 				return p.parseVarReassignStmt()
 			case tokens.LEFT_PAREN:
 				return p.parseFuncCallStmt()
+			case tokens.PLUS_PLUS:
+				return p.parseIncrementStmt()
+			case tokens.MINUS_MINUS:
+				return p.parseDecrementStmt()
 			}
 		}
 	}

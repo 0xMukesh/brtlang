@@ -3,7 +3,11 @@ package utils
 import (
 	"fmt"
 	"os"
+	"slices"
+	"unicode"
 	"unicode/utf8"
+
+	"github.com/0xmukesh/interpreter/internal/tokens"
 )
 
 func EPrint(err string) {
@@ -29,6 +33,37 @@ func HasValueMap[K comparable, V comparable](dict map[K]V, e V) (*K, bool) {
 func HasValueArray[E comparable](arr []E, e E) bool {
 	for _, v := range arr {
 		if v == e {
+			return true
+		}
+	}
+
+	return false
+}
+
+// checks if `b` is a subset of `a`
+func IsSubset[T ~[]E, E comparable](a, b T) bool {
+	for _, v := range a {
+		if !slices.Contains(b, v) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func IsAlphaOnly(s string) bool {
+	for _, v := range s {
+		if !unicode.IsLetter(v) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func IsReservedKeyword(keyword string) bool {
+	for _, v := range tokens.TknLiteralMapping {
+		if v == keyword {
 			return true
 		}
 	}

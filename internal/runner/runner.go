@@ -76,6 +76,38 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 		case ast.PrintStmt:
 			val := r.RunNode(value.Node, r.Runtime.CurrEnv())
 			fmt.Println(val)
+		case ast.IncrementStmt:
+			currEnv := r.Runtime.CurrEnv()
+			val, env := currEnv.GetVar(value.Name)
+
+			if val == nil {
+				err := runtime.NewRuntimeError(runtime.UNDEFINED_IDENTIFIER, value.Name, expr.GetLine())
+				utils.EPrint(err.Error())
+			}
+
+			valNum, isNum := val.Value.(float64)
+			if !isNum {
+				err := runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), value.Name, expr.GetLine())
+				utils.EPrint(err.Error())
+			}
+
+			env.SetVar(value.Name, *runtime.NewRuntimeValue(valNum + 1))
+		case ast.DecrementStmt:
+			currEnv := r.Runtime.CurrEnv()
+			val, env := currEnv.GetVar(value.Name)
+
+			if val == nil {
+				err := runtime.NewRuntimeError(runtime.UNDEFINED_IDENTIFIER, value.Name, expr.GetLine())
+				utils.EPrint(err.Error())
+			}
+
+			valNum, isNum := val.Value.(float64)
+			if !isNum {
+				err := runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), value.Name, expr.GetLine())
+				utils.EPrint(err.Error())
+			}
+
+			env.SetVar(value.Name, *runtime.NewRuntimeValue(valNum - 1))
 		case ast.CreateBlockStmt:
 			if localEnv != nil {
 				env := runtime.NewEnvironment(runtime.RuntimeVarMapping{}, runtime.RuntimeFuncMapping{}, localEnv)
@@ -174,7 +206,7 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 			funcMapping := *funcMappingPtr
 
 			if len(value.Args) != len(funcMapping.Args) {
-				err := runtime.NewRuntimeError(fmt.Sprintf("invalid number of arguments. expected %d arguments but got %d arguments", len(funcMapping.Args), len(value.Args)), value.Name, value.Line)
+				err := runtime.NewRuntimeError(fmt.Sprintf("damn, do you even know how you count? the function expected %d arguments but you gave %d arguments", len(funcMapping.Args), len(value.Args)), value.Name, value.Line)
 				utils.EPrint(err.Error())
 			}
 
