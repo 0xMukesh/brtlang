@@ -1,11 +1,16 @@
-yo age = 17;
-yo isAdult = age >= 18;
+rizz age = 17;
+// brtlang is incapable to properly group expression because of attention deficiency 
+// so you have to do it yourself (DIY time!)
+rizz isTeen = (age >= 13) && (age < 18);
+rizz isAdult = age >= 18;
 
-// `hmm` is equivalent to if
+// `edging` is equivalent to if
 // `mid` is equivalent to else if
-// `nah` is equivalent to else
-hmm(isAdult) {
+// `amogus` is equivalent to else
+edging(isAdult) {
   yap("is an adult");
-} nah {
+} mid(isTeen) {
+  yap("is a teen");
+} amogus {
   yap("isn't an adult");
 }
