@@ -199,7 +199,11 @@ func (p *Parser) multiplicationRule() (*ast.AstNode, *ParserError) {
 }
 
 func (p *Parser) divisionRule() (*ast.AstNode, *ParserError) {
-	return p.binaryRuleBuilder(p.divisionRule, p.unaryRule, tokens.SLASH)
+	return p.binaryRuleBuilder(p.divisionRule, p.moduloRule, tokens.SLASH)
+}
+
+func (p *Parser) moduloRule() (*ast.AstNode, *ParserError) {
+	return p.binaryRuleBuilder(p.moduloRule, p.unaryRule, tokens.MODULO)
 }
 
 func (p *Parser) unaryRule() (*ast.AstNode, *ParserError) {

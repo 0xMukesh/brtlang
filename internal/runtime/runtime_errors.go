@@ -17,8 +17,6 @@ const (
 
 	INVALID_OPERAND  = "this operand ain't it, chief"
 	INVALID_OPERATOR = "this operator ain't it, chief"
-
-	EXPECTED_EXPRESSION = "yo, where's the vibe? i was expecting an expression over here"
 )
 
 func (e RuntimeError) Error() string {
@@ -45,6 +43,5 @@ func OperandsMustBeOfErrBuilder(expectedTypes ...string) string {
 }
 
 func ExpectedExprErrBuilder(expectedExprType string) string {
-	parts := strings.Split(EXPECTED_EXPRESSION, " ")
-	return fmt.Sprintf("%s %s %s", parts[0], expectedExprType, parts[1])
+	return fmt.Sprintf("yo, where's the vibe? i was an expecting %s", expectedExprType)
 }

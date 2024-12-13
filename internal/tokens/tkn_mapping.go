@@ -3,29 +3,25 @@ package tokens
 type TokenType int
 
 const (
-	// 0
 	EOF TokenType = iota
 	ILLEGAL
 	IGNORE // placeholder type for tokens which can be ignored
 
-	// 3
 	LEFT_PAREN
 	RIGHT_PAREN
 	LEFT_BRACE
 	RIGHT_BRACE
 
-	// 7
 	COMMA
 	SEMICOLON
 
-	// 9
 	PLUS
 	MINUS
 	DOT
 	STAR
 	SLASH
+	MODULO
 
-	// 14
 	EQUAL
 	EQUAL_EQUAL
 	BANG
@@ -35,34 +31,27 @@ const (
 	GREATER
 	GREATER_EQUAL
 
-	// 22
 	STRING
 	NUMBER
 	IDENTIFIER
 
-	// 24
 	TRUE
 	FALSE
 	NIL
 
-	// 27
 	IF
 	ELSE_IF
 	ELSE
 
-	// 30
 	VAR
 	PRINT
 
-	// 32
 	AND
 	OR
 
-	// 34
 	WHILE
 	FOR
 
-	// 36
 	FUNC
 	RETURN
 )
@@ -79,6 +68,7 @@ var TknLiteralMapping = map[TokenType]string{
 	DOT:           ".",
 	STAR:          "*",
 	SLASH:         "/",
+	MODULO:        "%",
 	EQUAL:         "=",
 	EQUAL_EQUAL:   "==",
 	BANG:          "!",
@@ -143,6 +133,8 @@ func (t TokenType) String() string {
 		return "STAR"
 	case SLASH:
 		return "SLASH"
+	case MODULO:
+		return "MODULO"
 	case EQUAL:
 		return "EQUAL"
 	case EQUAL_EQUAL:

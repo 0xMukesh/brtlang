@@ -1,0 +1,19 @@
+skibidi fizzBuzz(lim) {
+  rizz i = 1;
+
+  vibin (i <= lim) {
+    edging ((i%3 == 0) && (i%5 == 0)) {
+      yap("fizzbuzz");
+    } mid (i%3 == 0) {
+      yap("fizz");
+    } mid (i%5 == 0) {
+      yap("buzz");
+    } amogus {
+      yap(i);
+    }
+
+    i = i + 1;
+  }
+}
+
+fizzBuzz(15)

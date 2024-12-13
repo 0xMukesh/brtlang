@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"math"
 	"reflect"
 	"strconv"
 
@@ -244,6 +245,22 @@ func (e *Evaluator) evaluateBinaryExpr(binaryExpr ast.BinaryExpr) (*runtime.Runt
 		}
 
 		return runtime.NewRuntimeValue(leftNum / rightNum), nil
+	case tokens.MODULO:
+		leftNum, isLeftNum := left.Value.(float64)
+		rightNum, isRightNum := right.Value.(float64)
+
+		if !(isLeftNum && isRightNum) {
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("number"), binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		isLeftInt := leftNum == math.Floor(leftNum)
+		isRightInt := rightNum == math.Floor(rightNum)
+
+		if !(isLeftInt && isRightInt) {
+			return nil, runtime.NewRuntimeError(runtime.OperandsMustBeOfErrBuilder("int"), binaryExpr.Operator.Literal(), binaryExpr.Line)
+		}
+
+		return runtime.NewRuntimeValue(float64(int(leftNum) % int(rightNum))), nil
 	case tokens.LESS:
 		leftNum, isLeftNum := left.Value.(float64)
 		rightNum, isRightNum := right.Value.(float64)

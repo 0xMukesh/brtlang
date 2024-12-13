@@ -94,3 +94,8 @@ func (l *Lexer) LexPipeChar() (*tokens.Token, *LexerError) {
 
 	return nil, NewLexerError(`missing "|" character`, l.Line)
 }
+
+// scans "%" token
+func (l *Lexer) LexModuloChar() (*tokens.Token, *LexerError) {
+	return tokens.NewToken(tokens.MODULO, tokens.MODULO.Literal(), "null", l.Line), nil
+}
