@@ -1,6 +1,6 @@
 # brtlang
 
-a toy programming language whose code is _brainrot_
+brtlang is a toy, meme-inspired programming language which replaces the conventional programming keywords with meme references.
 
 ## usage
 
@@ -23,6 +23,46 @@ execute the code via the following command
 ```
 ./brtlang run test.brt
 ```
+
+## language reference
+
+## keywords
+
+| brtlang | golang equivalent |
+| ------- | ----------------- |
+| rizz    | var               |
+| edging  | if                |
+| mid     | else if           |
+| amogus  | else              |
+| bet     | true              |
+| cap     | false             |
+| nada    | nil               |
+| vibin   | while             |
+| chillin | for               |
+| skibidi | func              |
+| bussin  | return            |
+
+## built-in functions
+
+1. `yap(string)` - equivalent to `fmt.Println`
+
+## operators
+
+1. `+` - addition
+2. `++` - increment
+3. `-` - subtraction
+4. `--` - decrement
+5. `*` - multiplication
+6. `/` - division
+7. `%` - modulo
+8. `=` - assignment
+9. `<` - less than
+10. `<=` - less than equal to
+11. `>` - greater than
+12. `>=` - greater than equal to
+13. `==` - equal
+14. `&&` - and
+15. `||` - or
 
 ## examples
 
