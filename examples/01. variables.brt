@@ -1,5 +1,5 @@
-// define a varible via `yo` keyword
-yo msg = "sup";
+// define a varible via `rizz` keyword
+rizz msg = "sup";
 yap(msg); // sup
 
 msg = "wsg";

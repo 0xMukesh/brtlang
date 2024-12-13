@@ -25,15 +25,15 @@ func (s BaseStmt) isAstValue() bool { return true }
 
 type VarAssignStmt struct {
 	BaseStmt
-	Expr Expr
+	Node AstNode
 	Name string
 }
 
-func (s VarAssignStmt) GetExpr() Expr { return s.Expr }
-func NewVarAssignStmt(name string, expr Expr, line int) VarAssignStmt {
+func (s VarAssignStmt) GetExpr() Expr { return s.Node.ExtractExpr() }
+func NewVarAssignStmt(name string, node AstNode, line int) VarAssignStmt {
 	return VarAssignStmt{
 		Name: name,
-		Expr: expr,
+		Node: node,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},
@@ -42,15 +42,15 @@ func NewVarAssignStmt(name string, expr Expr, line int) VarAssignStmt {
 
 type VarReassignStmt struct {
 	BaseStmt
-	Expr Expr
+	Node AstNode
 	Name string
 }
 
-func (s VarReassignStmt) GetExpr() Expr { return s.Expr }
-func NewVarReassignStmt(name string, expr Expr, line int) VarReassignStmt {
+func (s VarReassignStmt) GetExpr() Expr { return s.Node.ExtractExpr() }
+func NewVarReassignStmt(name string, node AstNode, line int) VarReassignStmt {
 	return VarReassignStmt{
 		Name: name,
-		Expr: expr,
+		Node: node,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},
@@ -102,16 +102,16 @@ func NewCloseBlockStmt(line int) CloseBlockStmt {
 
 type IfStmt struct {
 	BaseStmt
-	Expr           Expr
+	Node           AstNode
 	IfBranch       AstNode
 	ElseIfBranches *[]ElseIfStmt
 	ElseBranch     *ElseStmt
 }
 
-func (s IfStmt) GetExpr() Expr { return s.Expr }
-func NewIfStmt(expr Expr, ifBranch AstNode, elseIfBranches *[]ElseIfStmt, elseBranch *ElseStmt, line int) IfStmt {
+func (s IfStmt) GetExpr() Expr { return s.Node.ExtractExpr() }
+func NewIfStmt(node AstNode, ifBranch AstNode, elseIfBranches *[]ElseIfStmt, elseBranch *ElseStmt, line int) IfStmt {
 	return IfStmt{
-		Expr:           expr,
+		Node:           node,
 		IfBranch:       ifBranch,
 		ElseIfBranches: elseIfBranches,
 		ElseBranch:     elseBranch,
@@ -123,14 +123,14 @@ func NewIfStmt(expr Expr, ifBranch AstNode, elseIfBranches *[]ElseIfStmt, elseBr
 
 type ElseIfStmt struct {
 	BaseStmt
-	Expr   Expr
+	Node   AstNode
 	Branch AstNode
 }
 
-func (s ElseIfStmt) GetExpr() Expr { return s.Expr }
-func NewElseIfStmt(expr Expr, branch AstNode, line int) ElseIfStmt {
+func (s ElseIfStmt) GetExpr() Expr { return s.Node.ExtractExpr() }
+func NewElseIfStmt(node AstNode, branch AstNode, line int) ElseIfStmt {
 	return ElseIfStmt{
-		Expr:   expr,
+		Node:   node,
 		Branch: branch,
 		BaseStmt: BaseStmt{
 			Line: line,
@@ -155,15 +155,15 @@ func NewElseStmt(branch AstNode, line int) ElseStmt {
 
 type WhileStmt struct {
 	BaseStmt
-	Expr Expr
-	Node AstNode
+	Node   AstNode
+	Branch AstNode
 }
 
-func (s WhileStmt) GetExpr() Expr { return s.Expr }
-func NewWhileStmt(expr Expr, node AstNode, line int) WhileStmt {
+func (s WhileStmt) GetExpr() Expr { return s.Node.ExtractExpr() }
+func NewWhileStmt(node AstNode, branch AstNode, line int) WhileStmt {
 	return WhileStmt{
-		Expr: expr,
-		Node: node,
+		Node:   node,
+		Branch: branch,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},
@@ -193,17 +193,15 @@ type FuncCallStmt struct {
 	BaseStmt
 	Name       string
 	Args       []AstNode
-	ReturnExpr Expr
+	ReturnNode AstNode
 }
 
-func (s FuncCallStmt) GetExpr() Expr {
-	return s.ReturnExpr
-}
-func NewFuncCallStmt(name string, args []AstNode, returnExpr Expr, line int) FuncCallStmt {
+func (s FuncCallStmt) GetExpr() Expr { return s.ReturnNode.ExtractExpr() }
+func NewFuncCallStmt(name string, args []AstNode, returnNode AstNode, line int) FuncCallStmt {
 	return FuncCallStmt{
 		Name:       name,
 		Args:       args,
-		ReturnExpr: returnExpr,
+		ReturnNode: returnNode,
 		BaseStmt: BaseStmt{
 			Line: line,
 		},

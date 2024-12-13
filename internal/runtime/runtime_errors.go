@@ -12,19 +12,17 @@ type RuntimeError struct {
 }
 
 const (
-	UNDEFINED_IDENTIFIER      = "undefined identifier"
-	IDENTIFIER_ALREADY_EXISTS = "identifier already exists"
+	UNDEFINED_IDENTIFIER      = "damn bruv, this identifier got that invisible drip"
+	IDENTIFIER_ALREADY_EXISTS = "nah, the sequel ain't happening for this identifier"
 
-	INVALID_OPERAND  = "invalid operand"
-	INVALID_OPERATOR = "invalid operator"
+	INVALID_OPERAND  = "this operand ain't it, chief"
+	INVALID_OPERATOR = "this operator ain't it, chief"
 
-	EXPECTED_EXPRESSION = "expected expression"
-
-	OPERANDS_MUST_BE_OF = "operands must be of"
+	EXPECTED_EXPRESSION = "yo, where's the vibe? i was expecting an expression over here"
 )
 
 func (e RuntimeError) Error() string {
-	return fmt.Sprintf("Runtime error: [line %d] Error at '%s': %s", e.Line, e.At, e.Message)
+	return fmt.Sprintf("[line %d] hell naw, im done you caused a runtime error at '%s': %s", e.Line, e.At, e.Message)
 }
 
 func NewRuntimeError(msg string, at string, line int) *RuntimeError {
@@ -38,11 +36,11 @@ func NewRuntimeError(msg string, at string, line int) *RuntimeError {
 func OperandsMustBeOfErrBuilder(expectedTypes ...string) string {
 	if len(expectedTypes) == 1 {
 		if expectedTypes[0] == "same" {
-			return fmt.Sprintf("%s same type", OPERANDS_MUST_BE_OF)
+			return "the operands out here are wildin'. they need to be of the same type"
 		}
-		return fmt.Sprintf("%s type %s", OPERANDS_MUST_BE_OF, expectedTypes[0])
+		return fmt.Sprintf("the operands out here are wildin'. they need to be of type %s", expectedTypes[0])
 	} else {
-		return fmt.Sprintf("%s type %s or %s", OPERANDS_MUST_BE_OF, strings.Join(expectedTypes[:len(expectedTypes)-1], ", "), expectedTypes[len(expectedTypes)-1])
+		return fmt.Sprintf("the operands out here are wildin'. they need to be of type %s or %s", strings.Join(expectedTypes[:len(expectedTypes)-1], ", "), expectedTypes[len(expectedTypes)-1])
 	}
 }
 

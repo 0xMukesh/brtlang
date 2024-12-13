@@ -17,5 +17,5 @@ func NewLexerError(msg string, line int) *LexerError {
 }
 
 func (e LexerError) Error() string {
-	return fmt.Sprintf("An error occured in lexer: [line %d] Error: %s", e.Line, e.Message)
+	return fmt.Sprintf("[line: %d] blud whatcha doing, lexer said nah: %s", e.Line, e.Message)
 }

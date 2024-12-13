@@ -65,11 +65,6 @@ const (
 	// 36
 	FUNC
 	RETURN
-
-	// 38
-	CLASS
-	SUPER
-	THIS
 )
 
 var TknLiteralMapping = map[TokenType]string{
@@ -92,6 +87,8 @@ var TknLiteralMapping = map[TokenType]string{
 	LESS_EQUAL:    "<=",
 	GREATER:       ">",
 	GREATER_EQUAL: ">=",
+	AND:           "&&",
+	OR:            "||",
 }
 
 var ReservedKeywordsMapping = map[TokenType]string{
@@ -103,15 +100,10 @@ var ReservedKeywordsMapping = map[TokenType]string{
 	ELSE:    ELSE.String(),
 	VAR:     VAR.String(),
 	PRINT:   PRINT.String(),
-	AND:     AND.String(),
-	OR:      OR.String(),
 	WHILE:   WHILE.String(),
 	FOR:     FOR.String(),
 	FUNC:    FUNC.String(),
 	RETURN:  RETURN.String(),
-	CLASS:   CLASS.String(),
-	SUPER:   SUPER.String(),
-	THIS:    THIS.String(),
 }
 
 func (t TokenType) IsReserved() bool {
@@ -174,15 +166,15 @@ func (t TokenType) String() string {
 	case IDENTIFIER:
 		return "IDENTIFIER"
 	case VAR:
-		return "YO"
+		return "RIZZ"
 	case PRINT:
 		return "YAP"
 	case IF:
-		return "HMM"
+		return "EDGING"
 	case ELSE_IF:
 		return "MID"
 	case ELSE:
-		return "NAH"
+		return "AMOGUS"
 	case TRUE:
 		return "BET"
 	case FALSE:
@@ -190,23 +182,17 @@ func (t TokenType) String() string {
 	case NIL:
 		return "NADA"
 	case AND:
-		return "N"
+		return "AND"
 	case OR:
-		return "EHH"
+		return "OR"
 	case WHILE:
 		return "VIBIN"
 	case FOR:
 		return "CHILLIN"
 	case FUNC:
-		return "VIBE"
+		return "SKIBIDI"
 	case RETURN:
-		return "YOINK"
-	case CLASS:
-		return "CLASS"
-	case SUPER:
-		return "SUPER"
-	case THIS:
-		return "THIS"
+		return "BUSSIN"
 	default:
 		return "ILLEGAL"
 	}

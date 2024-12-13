@@ -1,11 +1,12 @@
 // strings
-yo hello = "hello";
-yo world = "world";
+rizz hello = "hello";
+rizz world = "world";
 yap(hello + " " + world); // string concatenation
 
 // numbers
-yo int = 7;
-yo decimal = 4.2;
+rizz int = 7;
+rizz decimal = 4.2;
+
 yap(int*decimal);
 yap(int+decimal);
 yap(int/decimal);
@@ -20,14 +21,13 @@ yap(int!=decimal);
 // booleans
 // `bet` is equivalent to true
 // `cap` is equivalent to false
-yo true = bet;
-yo false = cap;
+rizz true = bet;
+rizz false = cap;
 
-yap(true n false); // `n` is equivalent to AND operator (&&)
-yap (true ehh false); // `ehh` is equivalent to OR operator (||)
+yap(true && false);
+yap(true || false);
 
 // nil
 // `nada` is equivalent to nil
-yo nil = nada;
-
+rizz nil = nada;
 yap(nil);

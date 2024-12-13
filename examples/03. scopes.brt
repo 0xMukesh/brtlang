@@ -1,8 +1,24 @@
-yo msg = "hi";
+rizz a = "global a";
+rizz b = "global b";
+rizz c = "global c";
+
 {
-  yo msg = "bye";
-  yap(msg); // bye
-  msg = "byeee";
-  yap(msg); // byeee
+  rizz a = "outer a";
+  rizz b = "outer b";
+
+  {
+    rizz a = "inner a";
+
+    yap(a);
+    yap(b);
+    yap(c);
+  }
+  
+  yap(a);
+  yap(b);
+  yap(c);
 }
-yap(msg); // hi
+
+yap(a);
+yap(b);
+yap(c);

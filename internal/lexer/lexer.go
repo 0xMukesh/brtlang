@@ -97,7 +97,13 @@ func (l *Lexer) Lex() (*tokens.Token, *LexerError) {
 
 			return tkn, err
 		} else {
-			if l.Char == '"' {
+			if l.Char == '&' {
+				tkn, err := l.LexAmpersandChar()
+				return tkn, err
+			} else if l.Char == '|' {
+				tkn, err := l.LexPipeChar()
+				return tkn, err
+			} else if l.Char == '"' {
 				tkn, err := l.LexStrLiterals()
 				return tkn, err
 			} else if unicode.IsDigit(rune(l.Char)) {

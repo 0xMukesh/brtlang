@@ -78,20 +78,21 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 			fmt.Println(val)
 		case ast.CreateBlockStmt:
 			if localEnv != nil {
-				r.Runtime.AddNewEnv(*localEnv)
+				env := runtime.NewEnvironment(runtime.RuntimeVarMapping{}, runtime.RuntimeFuncMapping{}, localEnv)
+				r.Runtime.AddNewEnv(*env)
 				for _, node := range value.Nodes {
-					r.RunNode(node, localEnv)
+					r.RunNode(node, env)
 				}
 			}
 		case ast.CloseBlockStmt:
 			r.Runtime.RemoveLastEnv()
 		case ast.VarAssignStmt:
-			val := r.RunNode(node, r.Runtime.CurrEnv())
+			val := r.RunNode(value.Node, r.Runtime.CurrEnv())
 
 			if val != nil {
 				currEnv := r.Runtime.CurrEnv()
-				varVal, _ := currEnv.GetVar(value.Name)
-				if varVal != nil {
+				_, ok := currEnv.Vars[value.Name]
+				if ok {
 					err := runtime.NewRuntimeError(runtime.IDENTIFIER_ALREADY_EXISTS, value.Name, value.Line)
 					utils.EPrint(err.Error())
 				}
@@ -107,7 +108,7 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 				utils.EPrint(err.Error())
 			}
 
-			exprVal, err := r.Evaluator.EvaluateExpr(value.Expr)
+			exprVal, err := r.Evaluator.EvaluateExpr(value.Node.ExtractExpr())
 			if err != nil {
 				utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
 			}
@@ -117,14 +118,14 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 			}
 		case ast.IfStmt:
 			var res bool
-			res = r.EvalAndRunNode(value.Expr, value.IfBranch)
+			res = r.EvalAndRunNode(value.Node.ExtractExpr(), value.IfBranch)
 
 			if !res {
 				elseIfBranches := value.ElseIfBranches
 
 				if elseIfBranches != nil {
 					for _, elseIfBranch := range *elseIfBranches {
-						res = r.EvalAndRunNode(elseIfBranch.Expr, elseIfBranch.Branch)
+						res = r.EvalAndRunNode(elseIfBranch.Node.ExtractExpr(), elseIfBranch.Branch)
 						if res {
 							break
 						}
@@ -141,7 +142,7 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 			}
 		case ast.WhileStmt:
 			for {
-				val, err := r.Evaluator.EvaluateExpr(value.Expr)
+				val, err := r.Evaluator.EvaluateExpr(value.Node.ExtractExpr())
 				if err != nil {
 					utils.EPrint(fmt.Sprintf("%s\n", err.Error()))
 				}
@@ -150,7 +151,7 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 					conditionVal, isConditionBool := val.Value.(bool)
 
 					if !isConditionBool {
-						err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("bool"), value.Expr.ParseExpr(), value.Expr.GetLine())
+						err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("bool"), value.Node.ExtractExpr().ParseExpr(), value.Node.ExtractExpr().GetLine())
 						utils.EPrint(err.Error())
 					}
 

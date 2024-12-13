@@ -42,12 +42,12 @@ func (p *Parser) parseVarAssignStmt() (*ast.AstNode, *ParserError) {
 
 	varName := varNameLiteralExpr.Value
 
-	var varValueExpr ast.Expr
+	var varValueNode *ast.AstNode
 
 	if p.peek().Type == tokens.EQUAL {
 		p.advance()
 
-		varValueNode, err := p.Parse()
+		varValueNode, err = p.Parse()
 		if err != nil {
 			return nil, err
 		}
@@ -55,19 +55,13 @@ func (p *Parser) parseVarAssignStmt() (*ast.AstNode, *ParserError) {
 		if varValueNode == nil {
 			return nil, NewParserError(EXPRESSION_AFTER_ASSIGNMENT_EXPECTED, p.curr().Lexeme, p.curr().Line)
 		}
-
-		varValueExpr = varValueNode.ExtractExpr()
-
-		if varValueExpr == nil {
-			return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
-		}
 	} else {
-		varValueExpr = ast.NewLiteralExpr(tokens.NIL, "", p.curr().Line)
+		varValueNode = ast.NewAstNode(ast.EXPR, ast.NewLiteralExpr(tokens.NIL, "", p.curr().Line))
 	}
 
 	err = NewParserError(MISSING_SEMICOLON, p.curr().Lexeme, p.curr().Line)
 	p.consume(tokens.SEMICOLON, *err)
-	return ast.NewAstNode(ast.STMT, ast.NewVarAssignStmt(varName, varValueExpr, p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewVarAssignStmt(varName, *varValueNode, p.curr().Line)), nil
 }
 
 func (p *Parser) parseCreateBlockStmt() (*ast.AstNode, *ParserError) {
@@ -152,7 +146,7 @@ func (p *Parser) parseIfStmt() (*ast.AstNode, *ParserError) {
 			return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 		}
 
-		elseIfStmts = append(elseIfStmts, ast.NewElseIfStmt(elseIfConditionNode.ExtractExpr(), *elseIfBranch, p.curr().Line))
+		elseIfStmts = append(elseIfStmts, ast.NewElseIfStmt(*elseIfConditionNode, *elseIfBranch, p.curr().Line))
 	}
 
 	if p.peek().Type == tokens.ELSE {
@@ -170,7 +164,7 @@ func (p *Parser) parseIfStmt() (*ast.AstNode, *ParserError) {
 		elseStmt = ast.NewElseStmt(*elseBranch, p.curr().Line)
 	}
 
-	return ast.NewAstNode(ast.STMT, ast.NewIfStmt(ifConditionNode.ExtractExpr(), *ifBranch, &elseIfStmts, &elseStmt, p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewIfStmt(*ifConditionNode, *ifBranch, &elseIfStmts, &elseStmt, p.curr().Line)), nil
 }
 
 func (p *Parser) parseVarReassignStmt() (*ast.AstNode, *ParserError) {
@@ -187,26 +181,21 @@ func (p *Parser) parseVarReassignStmt() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	varValueExpr := varValueNode.ExtractExpr()
-	if varValueExpr == nil {
-		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
-	}
-
-	return ast.NewAstNode(ast.STMT, ast.NewVarReassignStmt(varName, varValueExpr, p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewVarReassignStmt(varName, *varValueNode, p.curr().Line)), nil
 }
 
 func (p *Parser) parseWhileStmt() (*ast.AstNode, *ParserError) {
-	expr, err := p.Parse()
-	if err != nil || expr == nil {
-		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
-	}
-
 	node, err := p.Parse()
 	if err != nil || node == nil {
 		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
 	}
 
-	return ast.NewAstNode(ast.STMT, ast.NewWhileStmt(expr.ExtractExpr(), *node, p.curr().Line)), nil
+	branch, err := p.Parse()
+	if err != nil || branch == nil {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewWhileStmt(*node, *branch, p.curr().Line)), nil
 }
 
 func (p *Parser) parseFuncDeclarationStmt() (*ast.AstNode, *ParserError) {
@@ -285,7 +274,7 @@ func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
 		}
 	}
 
-	var returnExpr ast.Expr
+	var returnNode ast.AstNode
 
 	currEnvPtr := p.Runtime.CurrEnv()
 	if currEnvPtr != nil {
@@ -298,11 +287,11 @@ func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
 				for _, node := range v.Nodes {
 					_, ok := node.Value.(ast.ReturnStmt)
 					if ok {
-						returnExpr = node.ExtractExpr()
+						returnNode = node
 					}
 				}
 			case ast.ReturnStmt:
-				returnExpr = v.Node.ExtractExpr()
+				returnNode = v.Node
 			}
 		}
 	}
@@ -313,7 +302,7 @@ func (p *Parser) parseFuncCallStmt() (*ast.AstNode, *ParserError) {
 
 	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
 
-	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(funcName, args, returnExpr, p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(funcName, args, returnNode, p.curr().Line)), nil
 }
 
 func (p *Parser) parseReturnStmt() (*ast.AstNode, *ParserError) {

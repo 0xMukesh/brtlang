@@ -16,7 +16,7 @@ rules in order of precedence (lowest to highest)
 5. multiplication (`*`)
 6. division (`/`)
 7. unary (`!`, `-`)
-8. logical (`n` (AND), `ehh` (OR))
+8. logical (`&&` (AND), `||` (OR))
 9. primary (string literals, number literals, booleans, `nil` and grouping expressions)
 
 ### flow
@@ -27,17 +27,15 @@ source code -> lexer -> parser -> (runner <-> evaluator) -> output
 
 | sanity  | insanity |
 | ------- | -------- |
-| var     | yo       |
+| var     | rizz     |
 | print   | yap      |
-| if      | hmm      |
+| if      | edging   |
 | else if | mid      |
-| else    | nah      |
+| else    | amogus   |
 | true    | bet      |
 | false   | cap      |
 | nil     | nada     |
-| and     | n        |
-| or      | ehh      |
 | while   | vibin    |
 | for     | chillin  |
-| func    | vibe     |
-| return  | yoink    |
+| func    | skibidi  |
+| return  | bussin   |
