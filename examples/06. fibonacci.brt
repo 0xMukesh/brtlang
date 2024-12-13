@@ -1,12 +1,12 @@
-yo lim = 10;
-yo fm = 0;
-yo fn = 1;
-yo idx = 0;
+rizz lim = 10;
+rizz fm = 0;
+rizz fn = 1;
+rizz idx = 0;
 
 vibin (idx < lim) {
   yap(fm);
 
-  yo temp = fm;
+  rizz temp = fm;
   fm = fn;
   fn = temp + fm;
   idx = idx + 1;
