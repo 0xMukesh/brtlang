@@ -159,7 +159,7 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 						break
 					}
 
-					r.RunNode(value.Node, r.Runtime.CurrEnv())
+					r.RunNode(value.Branch, r.Runtime.CurrEnv())
 				}
 			}
 		case ast.FuncCallStmt:

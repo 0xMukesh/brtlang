@@ -1,6 +1,6 @@
-// `vibin` is equivalent to while
-yo countdown = 3;
+rizz countdown = 3;
 
+// `vibin` is equivalent to while
 vibin(countdown > 0) {
   yap(countdown);
   countdown = countdown - 1;
