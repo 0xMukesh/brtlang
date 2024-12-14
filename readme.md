@@ -1,6 +1,6 @@
 # brtlang
 
-brtlang is a toy, meme-inspired programming language which replaces the conventional programming keywords with meme references.
+brtlang is a dynamically typed, toy, meme-inspired programming language which replaces the conventional programming keywords with meme references.
 
 ## usage
 

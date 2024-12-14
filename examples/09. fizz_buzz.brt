@@ -16,4 +16,4 @@ skibidi fizzBuzz(lim) {
   }
 }
 
-fizzBuzz(15)
+fizzBuzz(15);
