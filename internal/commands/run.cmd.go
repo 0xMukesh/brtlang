@@ -13,9 +13,7 @@ import (
 )
 
 func RunCmdHandler(src []byte) {
-	vars := make(runtime.RuntimeVarMapping)
-	funcs := make(runtime.RuntimeFuncMapping)
-	globaEnv := runtime.NewEnvironment(vars, funcs, nil)
+	globaEnv := runtime.DefaultGlobalEnvironment()
 	runtime := runtime.NewRuntime(&[]runtime.Environment{*globaEnv})
 
 	l := lexer.NewLexer(src)

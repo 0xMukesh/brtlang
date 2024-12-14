@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strconv"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/0xmukesh/interpreter/internal/runtime"
 	"github.com/0xmukesh/interpreter/internal/tokens"
 )
 
@@ -67,8 +69,21 @@ func IsReservedKeyword(keyword string) bool {
 			return true
 		}
 	}
-
 	return false
+}
+
+func IsNativeFunc(funcName string) bool {
+	for k := range runtime.NativeFnsReturnExprMapping {
+		if k == funcName {
+			return true
+		}
+	}
+	return false
+}
+
+func IsNumber(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
 }
 
 func FindLineNumber(charIdx int, src []byte) int {

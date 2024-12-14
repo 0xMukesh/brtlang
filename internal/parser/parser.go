@@ -308,6 +308,13 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 	case tokens.RETURN:
 		return p.parseReturnStmt()
 	case tokens.IDENTIFIER:
+		if utils.IsNativeFunc(p.curr().Lexeme) {
+			switch p.curr().Lexeme {
+			case runtime.VibeCheck:
+				return p.parseNativeClockFnCallStmt()
+			}
+		}
+
 		if !p.prev().Type.IsReserved() {
 			switch p.peek().Type {
 			case tokens.EQUAL:

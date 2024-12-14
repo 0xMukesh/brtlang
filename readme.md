@@ -45,6 +45,7 @@ execute the code via the following command
 ## built-in functions
 
 1. `yap(string)` - equivalent to `fmt.Println`
+2. `vibeCheck()` - equivalent to `time.Now().Unix()`
 
 ## operators
 

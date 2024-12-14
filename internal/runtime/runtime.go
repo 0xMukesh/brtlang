@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
 )
@@ -17,13 +18,31 @@ type FuncMapping struct {
 }
 type RuntimeFuncMapping = map[string]FuncMapping
 
+func NewFuncMapping(node ast.AstNode, args []ast.AstNode) FuncMapping {
+	return FuncMapping{
+		Node: node,
+		Args: args,
+	}
+}
+
 func NewRuntimeValue(value interface{}) *RuntimeValue {
 	return &RuntimeValue{
 		Value: value,
 	}
 }
 func (e RuntimeValue) String() string {
-	return fmt.Sprintf("%v", e.Value)
+	switch v := e.Value.(type) {
+	case string:
+		return v
+	case float64:
+		if v == math.Floor(v) {
+			return fmt.Sprintf("%d", int64(v))
+		}
+
+		return fmt.Sprintf("%f", v)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
 
 type Environment struct {
@@ -39,6 +58,18 @@ func NewEnvironment(vars RuntimeVarMapping, funcs RuntimeFuncMapping, parent *En
 		Funcs:  funcs,
 	}
 }
+
+func DefaultGlobalEnvironment() *Environment {
+	runtimeFuncMapping := make(RuntimeFuncMapping)
+	runtimeFuncMapping["vibeCheck"] = NativeClockFnMapping()
+
+	return &Environment{
+		Parent: nil,
+		Vars:   nil,
+		Funcs:  runtimeFuncMapping,
+	}
+}
+
 func (e *Environment) GetVar(name string) (*RuntimeValue, *Environment) {
 	val, ok := e.Vars[name]
 	if !ok {

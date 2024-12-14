@@ -259,9 +259,10 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 			localEnv.Vars = argsMapping
 			r.Runtime.AddNewEnv(*localEnv)
 
-			val := r.RunNode(funcMapping.Node, r.Runtime.CurrEnv())
-			return val
+			return r.RunNode(funcMapping.Node, r.Runtime.CurrEnv())
 		case ast.ReturnStmt:
+			fmt.Println("hi")
+			fmt.Printf("%+v\n", value.Node)
 			val := r.RunNode(value.Node, r.Runtime.CurrEnv())
 			if val == nil {
 				os.Exit(0)
