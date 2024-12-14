@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
-	"github.com/0xmukesh/interpreter/internal/runtime"
 	"github.com/0xmukesh/interpreter/internal/tokens"
 	"github.com/0xmukesh/interpreter/internal/utils"
 )
@@ -439,9 +438,10 @@ func (p *Parser) parseForStmt() (*ast.AstNode, *ParserError) {
 	return ast.NewAstNode(ast.STMT, ast.NewForStmt(*node, *initNode, *conditionNode, *updateNode, p.curr().Line)), nil
 }
 
-func (p *Parser) parseNativeClockFnCallStmt() (*ast.AstNode, *ParserError) {
+// vibeCheck()
+func (p *Parser) parseNativeClockFnStmt() (*ast.AstNode, *ParserError) {
 	p.consume(tokens.LEFT_PAREN, *NewParserError(MISSING_LPAREN, p.curr().Lexeme, p.curr().Line))
 	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
 
-	return ast.NewAstNode(ast.STMT, ast.NewFuncCallStmt(runtime.VibeCheck, nil, runtime.NativeClockFnReturnExprNode(), p.curr().Line)), nil
+	return ast.NewAstNode(ast.STMT, ast.NewNativeClockFnStmt(p.curr().Line)), nil
 }

@@ -308,19 +308,19 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 	case tokens.RETURN:
 		return p.parseReturnStmt()
 	case tokens.IDENTIFIER:
-		if utils.IsNativeFunc(p.curr().Lexeme) {
-			switch p.curr().Lexeme {
-			case runtime.VibeCheck:
-				return p.parseNativeClockFnCallStmt()
-			}
-		}
-
 		if !p.prev().Type.IsReserved() {
 			switch p.peek().Type {
 			case tokens.EQUAL:
 				return p.parseVarReassignStmt()
 			case tokens.LEFT_PAREN:
-				return p.parseFuncCallStmt()
+				if utils.IsNativeFunc(p.curr().Lexeme) {
+					switch p.curr().Lexeme {
+					case runtime.VibeCheck:
+						return p.parseNativeClockFnStmt()
+					}
+				} else {
+					return p.parseFuncCallStmt()
+				}
 			case tokens.PLUS_PLUS:
 				return p.parseIncrementStmt()
 			case tokens.MINUS_MINUS:

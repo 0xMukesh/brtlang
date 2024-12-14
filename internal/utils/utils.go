@@ -73,8 +73,8 @@ func IsReservedKeyword(keyword string) bool {
 }
 
 func IsNativeFunc(funcName string) bool {
-	for k := range runtime.NativeFnsReturnExprMapping {
-		if k == funcName {
+	for _, v := range runtime.NativeFns {
+		if v == funcName {
 			return true
 		}
 	}

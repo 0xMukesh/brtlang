@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/0xmukesh/interpreter/internal/ast"
 	"github.com/0xmukesh/interpreter/internal/evaluator"
@@ -261,19 +262,19 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 
 			return r.RunNode(funcMapping.Node, r.Runtime.CurrEnv())
 		case ast.ReturnStmt:
-			fmt.Println("hi")
-			fmt.Printf("%+v\n", value.Node)
 			val := r.RunNode(value.Node, r.Runtime.CurrEnv())
 			if val == nil {
 				os.Exit(0)
 			}
 			return val
+		case ast.NativeClockFnStmt:
+			return runtime.NewRuntimeValue(time.Now().Unix())
 		}
 	} else {
 		groupingExpr, ok := expr.(ast.GroupingExpr)
 
 		if ok {
-			if _, ok := groupingExpr.Node.Value.(ast.FuncCallStmt); ok {
+			if _, ok := groupingExpr.Node.Value.(ast.Stmt); ok {
 				val := r.RunNode(groupingExpr.Node, r.Runtime.CurrEnv())
 				return val
 			}

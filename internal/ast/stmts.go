@@ -301,3 +301,17 @@ func NewForStmt(node, init, condition, update AstNode, line int) ForStmt {
 		},
 	}
 }
+
+// vibeCheck()
+type NativeClockFnStmt struct {
+	BaseStmt
+}
+
+func (s NativeClockFnStmt) GetExpr() Expr { return nil }
+func NewNativeClockFnStmt(line int) NativeClockFnStmt {
+	return NativeClockFnStmt{
+		BaseStmt: BaseStmt{
+			Line: line,
+		},
+	}
+}

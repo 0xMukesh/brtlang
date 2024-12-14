@@ -59,17 +59,6 @@ func NewEnvironment(vars RuntimeVarMapping, funcs RuntimeFuncMapping, parent *En
 	}
 }
 
-func DefaultGlobalEnvironment() *Environment {
-	runtimeFuncMapping := make(RuntimeFuncMapping)
-	runtimeFuncMapping["vibeCheck"] = NativeClockFnMapping()
-
-	return &Environment{
-		Parent: nil,
-		Vars:   nil,
-		Funcs:  runtimeFuncMapping,
-	}
-}
-
 func (e *Environment) GetVar(name string) (*RuntimeValue, *Environment) {
 	val, ok := e.Vars[name]
 	if !ok {
