@@ -1,6 +1,9 @@
 package parser
 
 import (
+	"fmt"
+	"slices"
+
 	"github.com/0xmukesh/interpreter/internal/ast"
 	"github.com/0xmukesh/interpreter/internal/tokens"
 	"github.com/0xmukesh/interpreter/internal/utils"
@@ -355,4 +358,82 @@ func (p *Parser) parseDecrementStmt() (*ast.AstNode, *ParserError) {
 	}
 
 	return ast.NewAstNode(ast.STMT, ast.NewDecrementStmt(varName, p.curr().Line)), nil
+}
+
+//	chillin ((init); (condition); (update)) {
+//	  ...node
+//	}
+//
+// `init`	 -> variable declaration statement
+// `condition` -> binary expression with comparision operator
+// `update` -> variable re-declaration statement
+func (p *Parser) parseForStmt() (*ast.AstNode, *ParserError) {
+	p.consume(tokens.LEFT_PAREN, *NewParserError(MISSING_LPAREN, p.curr().Lexeme, p.curr().Line))
+
+	initNode, err := p.Parse()
+	if err != nil || initNode == nil {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	initStmt, ok := initNode.Value.(ast.Stmt)
+	if !ok {
+		return nil, NewParserError(STATEMENT_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	if _, ok := initStmt.(ast.VarAssignStmt); !ok {
+		return nil, NewParserError(fmt.Sprintf(INVALID_STATEMENT_TEMPLATE, "variable assignment"), p.curr().Lexeme, p.curr().Line)
+	}
+
+	// `parseVarAssignStmt` checks if `;` is present, so it isn't required to check it over again
+	// p.consume(tokens.SEMICOLON, *NewParserError(MISSING_SEMICOLON, p.curr().Lexeme, p.curr().Line))
+
+	conditionNode, err := p.Parse()
+
+	if err != nil || conditionNode == nil {
+		return nil, NewParserError(INVALID_EXPRESSION, p.curr().Lexeme, p.curr().Line)
+	}
+
+	conditionExpr, ok := conditionNode.Value.(ast.Expr)
+	if !ok {
+		return nil, NewParserError(EXPRESSION_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	binaryExpr, ok := conditionExpr.(ast.BinaryExpr)
+	if !ok {
+		return nil, NewParserError(fmt.Sprintf(INVALID_STATEMENT_TEMPLATE, "variable assignment"), p.curr().Lexeme, p.curr().Line)
+	}
+
+	if !slices.Contains([]tokens.TokenType{tokens.LESS, tokens.LESS_EQUAL, tokens.GREATER, tokens.GREATER_EQUAL, tokens.EQUAL_EQUAL, tokens.BANG_EQUAL}, binaryExpr.Operator) {
+		return nil, NewParserError(fmt.Sprintf(INVALID_OPERATOR_TEMPLATE, binaryExpr.Operator.Literal()), p.curr().Lexeme, p.curr().Line)
+	}
+
+	// parse functions for expressions don't check if they end in a `;`
+	p.consume(tokens.SEMICOLON, *NewParserError(MISSING_SEMICOLON, p.curr().Lexeme, p.curr().Line))
+
+	updateNode, err := p.Parse()
+	if err != nil {
+		return nil, err
+	}
+
+	updateStmt, ok := updateNode.Value.(ast.Stmt)
+	if !ok {
+		return nil, NewParserError(STATEMENT_EXPECTED, p.curr().Lexeme, p.curr().Line)
+	}
+
+	_, isVarReassignStmt := updateStmt.(ast.VarReassignStmt)
+	_, isIncrementStmt := updateStmt.(ast.IncrementStmt)
+	_, isDecrementStmt := updateStmt.(ast.DecrementStmt)
+
+	if !(isVarReassignStmt || isIncrementStmt || isDecrementStmt) {
+		return nil, NewParserError(fmt.Sprintf(INVALID_STATEMENT_TEMPLATE, "variable re-assignment"), p.curr().Lexeme, p.curr().Line)
+	}
+
+	p.consume(tokens.RIGHT_PAREN, *NewParserError(MISSING_RPAREN, p.curr().Lexeme, p.curr().Line))
+
+	node, err := p.Parse()
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.NewAstNode(ast.STMT, ast.NewForStmt(*node, *initNode, *conditionNode, *updateNode, p.curr().Line)), nil
 }

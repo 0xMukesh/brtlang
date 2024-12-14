@@ -6,6 +6,8 @@ const (
 	EXPRESSION_EXPECTED          = "yo, where's the vibe? i was expecting an expression over here"
 	EXPRESSION_EXPECTED_TEMPLATE = "yo, where's the vibe? i was expecting an %s expression over here"
 
+	STATEMENT_EXPECTED = "yo, where's the vibe? i was expecting a statement over here"
+
 	EXPRESSION_AFTER_ASSIGNMENT_EXPECTED = "vibe check failed, blud misunderstood the assignment. i was expecting an expression after assignment"
 	VARIABLE_NAME_EXPECTED               = "yo, where's the vibe? i was expecting a variable name over here"
 
@@ -17,8 +19,11 @@ const (
 
 	INVALID_TOKEN_TYPE_TEMPLATE = "ay, that token isn't allowed. expected %s token"
 
-	INVALID_VARIABLE_NAME = "who tf even allowed you to name this variable?"
-	INVALID_EXPRESSION    = "invalid expression? wow, didn't know we were coding in clown mode today"
+	INVALID_VARIABLE_NAME      = "who tf even allowed you to name this variable?"
+	INVALID_EXPRESSION         = "invalid expression? wow, didn't know we were coding in clown mode today"
+	INVALID_STATEMENT          = "invalid statement? wow, didn't know we were coding in clown mode today"
+	INVALID_STATEMENT_TEMPLATE = "invalid statement? wow, didn't know we were coding in clown mode today. expected %s statement"
+	INVALID_OPERATOR_TEMPLATE  = "this operator ain't it, chief. expected a comparision operator but got %s"
 
 	IDENTIFIER_ALREADY_EXISTS = "nah, the sequel ain't happening for this identifier"
 )

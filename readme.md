@@ -61,8 +61,9 @@ execute the code via the following command
 11. `>` - greater than
 12. `>=` - greater than equal to
 13. `==` - equal
-14. `&&` - and
-15. `||` - or
+14. `!=` - not equal
+15. `&&` - and
+16. `||` - or
 
 ## examples
 

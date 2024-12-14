@@ -301,6 +301,8 @@ func (p *Parser) primaryRule() (*ast.AstNode, *ParserError) {
 		return nil, NewParserError(MISSING_IF_BRANCH, p.curr().Lexeme, p.curr().Line)
 	case tokens.WHILE:
 		return p.parseWhileStmt()
+	case tokens.FOR:
+		return p.parseForStmt()
 	case tokens.FUNC:
 		return p.parseFuncDeclarationStmt()
 	case tokens.RETURN:

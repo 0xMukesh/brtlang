@@ -284,13 +284,13 @@ func NewDecrementStmt(name string, line int) DecrementStmt {
 type ForStmt struct {
 	BaseStmt
 	Node      AstNode
-	Init      Expr
-	Condition Expr
-	Update    Expr
+	Init      AstNode
+	Condition AstNode
+	Update    AstNode
 }
 
 func (s ForStmt) GetExpr() Expr { return nil }
-func NewForStmt(node AstNode, init, condition, update Expr, line int) ForStmt {
+func NewForStmt(node, init, condition, update AstNode, line int) ForStmt {
 	return ForStmt{
 		Node:      node,
 		Init:      init,

@@ -110,11 +110,23 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 			env.SetVar(value.Name, *runtime.NewRuntimeValue(valNum - 1))
 		case ast.CreateBlockStmt:
 			if localEnv != nil {
+				returnVal := runtime.NewRuntimeValue(nil)
+
 				env := runtime.NewEnvironment(runtime.RuntimeVarMapping{}, runtime.RuntimeFuncMapping{}, localEnv)
 				r.Runtime.AddNewEnv(*env)
 				for _, node := range value.Nodes {
-					r.RunNode(node, env)
+					val := r.RunNode(node, env)
+
+					stmt, ok := node.Value.(ast.Stmt)
+					if ok {
+						_, ok := stmt.(ast.ReturnStmt)
+						if ok {
+							returnVal = runtime.NewRuntimeValue(val)
+						}
+					}
 				}
+
+				return returnVal
 			}
 		case ast.CloseBlockStmt:
 			r.Runtime.RemoveLastEnv()
@@ -194,6 +206,31 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 					r.RunNode(value.Branch, r.Runtime.CurrEnv())
 				}
 			}
+		case ast.ForStmt:
+			r.RunNode(value.Init, r.Runtime.CurrEnv())
+
+			for {
+				val, err := r.Evaluator.EvaluateExpr(value.Condition.ExtractExpr())
+				if err != nil {
+					utils.EPrint(err.Error())
+				}
+
+				if val != nil {
+					conditionVal, isConditionBool := val.Value.(bool)
+
+					if !isConditionBool {
+						err := runtime.NewRuntimeError(runtime.ExpectedExprErrBuilder("bool"), value.Node.ExtractExpr().ParseExpr(), value.Node.ExtractExpr().GetLine())
+						utils.EPrint(err.Error())
+					}
+
+					if !conditionVal {
+						break
+					}
+
+					r.RunNode(value.Node, r.Runtime.CurrEnv())
+					r.RunNode(value.Update, r.Runtime.CurrEnv())
+				}
+			}
 		case ast.FuncCallStmt:
 			currEnv := r.Runtime.CurrEnv()
 			funcMappingPtr, _ := currEnv.GetFunc(value.Name)
@@ -222,7 +259,8 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 			localEnv.Vars = argsMapping
 			r.Runtime.AddNewEnv(*localEnv)
 
-			r.RunNode(funcMapping.Node, r.Runtime.CurrEnv())
+			val := r.RunNode(funcMapping.Node, r.Runtime.CurrEnv())
+			return val
 		case ast.ReturnStmt:
 			val := r.RunNode(value.Node, r.Runtime.CurrEnv())
 			if val == nil {
@@ -235,7 +273,8 @@ func (r *Runner) RunNode(node ast.AstNode, localEnv *runtime.Environment) *runti
 
 		if ok {
 			if _, ok := groupingExpr.Node.Value.(ast.FuncCallStmt); ok {
-				return r.RunNode(groupingExpr.Node, r.Runtime.CurrEnv())
+				val := r.RunNode(groupingExpr.Node, r.Runtime.CurrEnv())
+				return val
 			}
 
 			val, err := r.Evaluator.EvaluateExpr(groupingExpr)

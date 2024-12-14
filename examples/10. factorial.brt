@@ -1,0 +1,9 @@
+skibidi factorial(n) {
+  rizz res = 1;
+  chillin(rizz i = 1; i <= n; i++) {
+    res = res * i;
+  }
+  bussin res;
+}
+
+yap(factorial(5));
